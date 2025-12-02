@@ -1,0 +1,24 @@
+{
+  "name": "fanvue-chatbot",
+  "version": "1.0.0",
+  "description": "Fanvue API Chatbot Example",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node app.js"
+  },
+  "keywords": [
+    "fanvue",
+    "chatbot",
+    "api"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1",
+    "express-session": "^1.17.3"
+  }
+}
+
