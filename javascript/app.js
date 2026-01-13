@@ -32,6 +32,14 @@ const API_VERSION = process.env.API_VERSION || '2025-06-26';
 const OAUTH_AUTH_URL = `${OAUTH_ISSUER_BASE_URL}/oauth2/auth`;
 const OAUTH_TOKEN_URL = `${OAUTH_ISSUER_BASE_URL}/oauth2/token`;
 
+function buildAuthHeaders(accessToken) {
+  return {
+    'Authorization': `Bearer ${accessToken}`,
+    'X-Fanvue-API-Version': API_VERSION,
+    'Content-Type': 'application/json'
+  };
+}
+
 function base64url(input) {
   return input
     .toString('base64')
@@ -96,6 +104,25 @@ const HTML_TEMPLATE = `
             display: flex;
             gap: 10px;
             margin-top: 20px;
+        }
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0 10px;
+        }
+        select {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+        .hint {
+            color: #666;
+            font-size: 13px;
+            margin: 8px 0 0;
         }
         input[type="text"] {
             flex: 1;
@@ -169,6 +196,13 @@ const HTML_TEMPLATE = `
                 <strong>Bot:</strong> Hello! I'm your Fanvue chatbot assistant. How can I help you today?
             </div>
         </div>
+        <div class="toolbar">
+            <select id="conversationSelect" disabled>
+                <option value="">Loading conversations...</option>
+            </select>
+            <button onclick="loadConversations()" id="refreshButton">Refresh</button>
+        </div>
+        <p class="hint">Tip: start a conversation with a subscriber in Fanvue first, then refresh to see it here.</p>
         <div id="errorContainer"></div>
         <div class="input-container">
             <input type="text" id="messageInput" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
@@ -189,6 +223,47 @@ const HTML_TEMPLATE = `
             }
         }
 
+        async function loadConversations() {
+            const select = document.getElementById('conversationSelect');
+            const refreshButton = document.getElementById('refreshButton');
+            const errorContainer = document.getElementById('errorContainer');
+
+            refreshButton.disabled = true;
+            select.disabled = true;
+            select.innerHTML = '<option value="">Loading conversations...</option>';
+
+            try {
+                const response = await fetch('/api/conversations');
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to load conversations');
+                }
+
+                const conversations = data.conversations || [];
+                if (conversations.length === 0) {
+                    select.innerHTML = '<option value="">No conversations found</option>';
+                    errorContainer.innerHTML = '';
+                    return;
+                }
+
+                select.innerHTML = '';
+                conversations.forEach((conversation) => {
+                    const option = document.createElement('option');
+                    option.value = conversation.uuid;
+                    option.textContent = conversation.label || conversation.uuid;
+                    select.appendChild(option);
+                });
+                errorContainer.innerHTML = '';
+            } catch (error) {
+                select.innerHTML = '<option value="">Unable to load conversations</option>';
+                errorContainer.innerHTML = '<div class="error">Error: ' + error.message + '</div>';
+            } finally {
+                select.disabled = false;
+                refreshButton.disabled = false;
+            }
+        }
+
         async function sendMessage() {
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
@@ -197,6 +272,8 @@ const HTML_TEMPLATE = `
             const chatContainer = document.getElementById('chatContainer');
             const errorContainer = document.getElementById('errorContainer');
             const sendButton = document.getElementById('sendButton');
+            const conversationSelect = document.getElementById('conversationSelect');
+            const conversationUuid = conversationSelect.value;
 
             const userMessage = document.createElement('div');
             userMessage.className = 'message user';
@@ -218,7 +295,7 @@ const HTML_TEMPLATE = `
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ message: message })
+                    body: JSON.stringify({ message: message, conversationUuid: conversationUuid })
                 });
 
                 const data = await response.json();
@@ -241,6 +318,10 @@ const HTML_TEMPLATE = `
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
         }
+
+        window.addEventListener('load', () => {
+            loadConversations();
+        });
     </script>
 </body>
 </html>
@@ -567,6 +648,94 @@ async function refreshAccessTokenIfNeeded(req) {
   }
 }
 
+async function fetchUserInfo(req, headers) {
+  let userResponse;
+  try {
+    userResponse = await axios.get(`${API_BASE_URL}/users/me`, { headers });
+  } catch (error) {
+    userResponse = error.response;
+  }
+
+  const rateLimitError = handleRateLimit(userResponse);
+  if (rateLimitError) {
+    return { error: rateLimitError };
+  }
+
+  if (userResponse.status === 401) {
+    if (await refreshAccessTokenIfNeeded(req)) {
+      headers['Authorization'] = `Bearer ${req.session.access_token}`;
+      try {
+        userResponse = await axios.get(`${API_BASE_URL}/users/me`, { headers });
+      } catch (error) {
+        userResponse = error.response;
+      }
+      const retryRateLimitError = handleRateLimit(userResponse);
+      if (retryRateLimitError) {
+        return { error: retryRateLimitError };
+      }
+    } else {
+      return { error: { status: 401, error: 'Failed to get user info. Please log in again.' } };
+    }
+  }
+
+  if (userResponse.status !== 200) {
+    return { error: { status: userResponse.status, error: 'Failed to get user info' } };
+  }
+
+  return { data: userResponse.data };
+}
+
+app.get('/api/conversations', async (req, res) => {
+  if (!req.session.access_token) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  try {
+    let headers = buildAuthHeaders(req.session.access_token);
+    const userResult = await fetchUserInfo(req, headers);
+    if (userResult.error) {
+      return res.status(userResult.error.status || 429).json(userResult.error);
+    }
+
+    const userUuid = userResult.data.uuid;
+    if (!userUuid) {
+      return res.status(400).json({ error: 'User UUID not found' });
+    }
+
+    let conversationsResponse;
+    try {
+      conversationsResponse = await axios.get(
+        `${API_BASE_URL}/users/${userUuid}/conversations`,
+        { headers }
+      );
+    } catch (error) {
+      conversationsResponse = error.response;
+    }
+
+    const conversationsRateLimitError = handleRateLimit(conversationsResponse);
+    if (conversationsRateLimitError) {
+      return res.status(429).json(conversationsRateLimitError);
+    }
+
+    if (conversationsResponse.status !== 200) {
+      return res.status(conversationsResponse.status).json({ error: 'Failed to load conversations' });
+    }
+
+    const conversations = conversationsResponse.data?.data || conversationsResponse.data || [];
+    const formatted = Array.isArray(conversations)
+      ? conversations.map((conversation) => ({
+          uuid: conversation.uuid,
+          label: conversation.title || conversation.name || conversation.uuid
+        }))
+      : [];
+
+    return res.json({ conversations: formatted });
+  } catch (error) {
+    console.error('Error loading conversations:', error.response?.data || error.message);
+    return res.status(500).json({ error: error.response?.data?.message || error.message });
+  }
+});
+
 app.post('/api/send-message', async (req, res) => {
   if (!req.session.access_token) {
     return res.status(401).json({ error: 'Not authenticated' });
@@ -579,111 +748,22 @@ app.post('/api/send-message', async (req, res) => {
   }
 
   try {
-    let headers = {
-      'Authorization': `Bearer ${req.session.access_token}`,
-      'X-Fanvue-API-Version': API_VERSION,
-      'Content-Type': 'application/json'
-    };
-
-    let userResponse;
-    try {
-      userResponse = await axios.get(`${API_BASE_URL}/users/me`, { headers });
-    } catch (error) {
-      userResponse = error.response;
-    }
-    
-    const rateLimitError = handleRateLimit(userResponse);
-    if (rateLimitError) {
-      return res.status(429).json(rateLimitError);
-    }
-    
-    if (userResponse.status === 401) {
-      if (await refreshAccessTokenIfNeeded(req)) {
-        headers['Authorization'] = `Bearer ${req.session.access_token}`;
-        try {
-          userResponse = await axios.get(`${API_BASE_URL}/users/me`, { headers });
-        } catch (error) {
-          userResponse = error.response;
-        }
-        const retryRateLimitError = handleRateLimit(userResponse);
-        if (retryRateLimitError) {
-          return res.status(429).json(retryRateLimitError);
-        }
-      } else {
-        return res.status(401).json({ error: 'Failed to get user info. Please log in again.' });
-      }
-    }
-    
-    if (userResponse.status !== 200) {
-      return res.status(userResponse.status).json({ error: 'Failed to get user info' });
+    let headers = buildAuthHeaders(req.session.access_token);
+    const userResult = await fetchUserInfo(req, headers);
+    if (userResult.error) {
+      return res.status(userResult.error.status || 429).json(userResult.error);
     }
 
-    const userInfo = userResponse.data;
-    const userUuid = userInfo.uuid;
+    const userUuid = userResult.data.uuid;
 
     if (!userUuid) {
       return res.status(400).json({ error: 'User UUID not found' });
     }
 
-    let conversationUuid = null;
-
-    try {
-      let conversationsResponse;
-      try {
-        conversationsResponse = await axios.get(
-          `${API_BASE_URL}/users/${userUuid}/conversations`,
-          { headers }
-        );
-      } catch (error) {
-        conversationsResponse = error.response;
-      }
-
-      const conversationsRateLimitError = handleRateLimit(conversationsResponse);
-      if (conversationsRateLimitError) {
-        return res.status(429).json(conversationsRateLimitError);
-      }
-
-      if (conversationsResponse.status === 200) {
-        const conversations = conversationsResponse.data;
-        const conversationsList = conversations.data || conversations;
-        
-        if (Array.isArray(conversationsList) && conversationsList.length > 0) {
-          conversationUuid = conversationsList[0].uuid;
-        }
-      }
-    } catch (error) {
-      console.log('No existing conversations found, will create new one');
-    }
-
+    const conversationUuid = req.body.conversationUuid;
     if (!conversationUuid) {
-      try {
-        let createResponse;
-        try {
-          createResponse = await axios.post(
-            `${API_BASE_URL}/users/${userUuid}/conversations`,
-            {},
-            { headers }
-          );
-        } catch (error) {
-          createResponse = error.response;
-        }
-        
-        const createRateLimitError = handleRateLimit(createResponse);
-        if (createRateLimitError) {
-          return res.status(429).json(createRateLimitError);
-        }
-        
-        if (createResponse.status === 200 || createResponse.status === 201) {
-          conversationUuid = createResponse.data.uuid;
-        }
-      } catch (error) {
-        console.log('Could not create conversation:', error.response?.data || error.message);
-      }
-    }
-
-    if (!conversationUuid) {
-      return res.json({
-        response: `Your message: "${message}" was received. This is a demo chatbot - in a real implementation, this would send your message to the conversation.`
+      return res.status(400).json({
+        error: 'Please select a conversation before sending a message.'
       });
     }
 
@@ -730,4 +810,3 @@ app.listen(PORT, () => {
   console.log(`Fanvue Chatbot running at http://localhost:${PORT}`);
   console.log('Press Ctrl+C to stop the server');
 });
-
