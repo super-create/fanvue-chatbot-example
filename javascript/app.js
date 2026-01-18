@@ -26,7 +26,13 @@ const DEFAULT_SCOPES = 'openid offline_access offline';
 const USER_SCOPES = process.env.OAUTH_SCOPES || 'read:self read:chat write:chat';
 const OAUTH_SCOPES = `${DEFAULT_SCOPES} ${USER_SCOPES}`.trim();
 const OAUTH_ISSUER_BASE_URL = process.env.OAUTH_ISSUER_BASE_URL || 'https://auth.fanvue.com';
-const API_BASE_URL = process.env.API_BASE_URL || 'https://api.fanvue.com';
+
+function normalizeBaseUrl(url) {
+  return url.replace(/\/+$/, '');
+}
+
+const API_BASE_URL = normalizeBaseUrl(process.env.API_BASE_URL || 'https://api.fanvue.com');
+const API_FALLBACK_BASE_URL = API_BASE_URL.endsWith('/v1') ? null : `${API_BASE_URL}/v1`;
 const API_VERSION = process.env.API_VERSION || '2025-06-26';
 
 const OAUTH_AUTH_URL = `${OAUTH_ISSUER_BASE_URL}/oauth2/auth`;
@@ -38,6 +44,48 @@ function buildAuthHeaders(accessToken) {
     'X-Fanvue-API-Version': API_VERSION,
     'Content-Type': 'application/json'
   };
+}
+
+function buildFanvueUrl(baseUrl, path) {
+  return `${baseUrl}${path}`;
+}
+
+async function fanvueRequest(method, path, options = {}) {
+  const baseUrls = [API_BASE_URL];
+  if (API_FALLBACK_BASE_URL) {
+    baseUrls.push(API_FALLBACK_BASE_URL);
+  }
+
+  let lastResponse;
+  for (const baseUrl of baseUrls) {
+    const url = buildFanvueUrl(baseUrl, path);
+    try {
+      return await axios({ method, url, ...options });
+    } catch (error) {
+      if (!error.response) {
+        return { status: 500, data: { message: error.message }, headers: {} };
+      }
+      lastResponse = error.response;
+      if (error.response.status !== 404) {
+        return error.response;
+      }
+    }
+  }
+
+  return lastResponse;
+}
+
+async function fanvueRequestWithFallbackPaths(method, paths, options = {}) {
+  let lastResponse;
+  for (const path of paths) {
+    const response = await fanvueRequest(method, path, options);
+    lastResponse = response;
+    if (response?.status !== 404) {
+      return response;
+    }
+  }
+
+  return lastResponse;
 }
 
 function base64url(input) {
@@ -348,14 +396,14 @@ app.get('/', async (req, res) => {
     return res.send(renderTemplate(HTML_TEMPLATE, { loggedIn: false }));
   }
 
-  try {
-    const profileResponse = await axios.get(`${API_BASE_URL}/users/me`, {
-      headers: {
-        'Authorization': `Bearer ${req.session.access_token}`,
-        'X-Fanvue-API-Version': API_VERSION
-      }
-    });
+  const profileResponse = await fanvueRequest('get', '/users/me', {
+    headers: {
+      'Authorization': `Bearer ${req.session.access_token}`,
+      'X-Fanvue-API-Version': API_VERSION
+    }
+  });
 
+  if (profileResponse?.status === 200) {
     const userInfo = profileResponse.data;
     const username = userInfo.username || userInfo.email || 'User';
     
@@ -363,12 +411,12 @@ app.get('/', async (req, res) => {
       loggedIn: true,
       username: username
     }));
-  } catch (error) {
-    return res.send(renderTemplate(HTML_TEMPLATE, {
-      loggedIn: true,
-      username: 'User'
-    }));
   }
+
+  return res.send(renderTemplate(HTML_TEMPLATE, {
+    loggedIn: true,
+    username: 'User'
+  }));
 });
 
 app.get('/login', (req, res) => {
@@ -649,12 +697,7 @@ async function refreshAccessTokenIfNeeded(req) {
 }
 
 async function fetchUserInfo(req, headers) {
-  let userResponse;
-  try {
-    userResponse = await axios.get(`${API_BASE_URL}/users/me`, { headers });
-  } catch (error) {
-    userResponse = error.response;
-  }
+  let userResponse = await fanvueRequest('get', '/users/me', { headers });
 
   const rateLimitError = handleRateLimit(userResponse);
   if (rateLimitError) {
@@ -664,11 +707,7 @@ async function fetchUserInfo(req, headers) {
   if (userResponse.status === 401) {
     if (await refreshAccessTokenIfNeeded(req)) {
       headers['Authorization'] = `Bearer ${req.session.access_token}`;
-      try {
-        userResponse = await axios.get(`${API_BASE_URL}/users/me`, { headers });
-      } catch (error) {
-        userResponse = error.response;
-      }
+      userResponse = await fanvueRequest('get', '/users/me', { headers });
       const retryRateLimitError = handleRateLimit(userResponse);
       if (retryRateLimitError) {
         return { error: retryRateLimitError };
@@ -684,6 +723,72 @@ async function fetchUserInfo(req, headers) {
 
   return { data: userResponse.data };
 }
+
+app.get('/api/profile', async (req, res) => {
+  if (!req.session.access_token) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  try {
+    let headers = buildAuthHeaders(req.session.access_token);
+    const userResult = await fetchUserInfo(req, headers);
+    if (userResult.error) {
+      return res.status(userResult.error.status || 429).json(userResult.error);
+    }
+
+    return res.json({ profile: userResult.data });
+  } catch (error) {
+    console.error('Error loading profile:', error.response?.data || error.message);
+    return res.status(500).json({ error: error.response?.data?.message || error.message });
+  }
+});
+
+app.get('/api/creator-profile', async (req, res) => {
+  if (!req.session.access_token) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  try {
+    let headers = buildAuthHeaders(req.session.access_token);
+    const userResult = await fetchUserInfo(req, headers);
+    if (userResult.error) {
+      return res.status(userResult.error.status || 429).json(userResult.error);
+    }
+
+    const userUuid = userResult.data.uuid;
+    const creatorPaths = [
+      '/creators/me',
+      '/creator/me',
+      userUuid ? `/creators/${userUuid}` : null
+    ].filter(Boolean);
+
+    const creatorResponse = await fanvueRequestWithFallbackPaths(
+      'get',
+      creatorPaths,
+      { headers }
+    );
+
+    const creatorRateLimitError = handleRateLimit(creatorResponse);
+    if (creatorRateLimitError) {
+      return res.status(429).json(creatorRateLimitError);
+    }
+
+    if (creatorResponse.status !== 200) {
+      return res.status(creatorResponse.status).json({
+        error: 'Failed to load creator profile',
+        details: {
+          response: creatorResponse.data || null,
+          tried: creatorPaths
+        }
+      });
+    }
+
+    return res.json({ creator: creatorResponse.data });
+  } catch (error) {
+    console.error('Error loading creator profile:', error.response?.data || error.message);
+    return res.status(500).json({ error: error.response?.data?.message || error.message });
+  }
+});
 
 app.get('/api/conversations', async (req, res) => {
   if (!req.session.access_token) {
@@ -702,15 +807,25 @@ app.get('/api/conversations', async (req, res) => {
       return res.status(400).json({ error: 'User UUID not found' });
     }
 
-    let conversationsResponse;
-    try {
-      conversationsResponse = await axios.get(
-        `${API_BASE_URL}/users/${userUuid}/conversations`,
-        { headers }
-      );
-    } catch (error) {
-      conversationsResponse = error.response;
-    }
+    const conversationPaths = [
+      '/me/conversations',
+      '/me/chat/conversations',
+      '/me/messages/conversations',
+      '/me/chat/threads',
+      `/users/${userUuid}/conversations`,
+      `/users/${userUuid}/chat/conversations`,
+      `/creators/${userUuid}/conversations`,
+      `/creators/${userUuid}/chat/conversations`,
+      '/messages/conversations',
+      '/chat/threads',
+      '/conversations',
+      '/chat/conversations'
+    ];
+    const conversationsResponse = await fanvueRequestWithFallbackPaths(
+      'get',
+      conversationPaths,
+      { headers }
+    );
 
     const conversationsRateLimitError = handleRateLimit(conversationsResponse);
     if (conversationsRateLimitError) {
@@ -718,7 +833,13 @@ app.get('/api/conversations', async (req, res) => {
     }
 
     if (conversationsResponse.status !== 200) {
-      return res.status(conversationsResponse.status).json({ error: 'Failed to load conversations' });
+      return res.status(conversationsResponse.status).json({
+        error: 'Failed to load conversations',
+        details: {
+          response: conversationsResponse.data || null,
+          tried: conversationPaths
+        }
+      });
     }
 
     const conversations = conversationsResponse.data?.data || conversationsResponse.data || [];
@@ -767,32 +888,20 @@ app.post('/api/send-message', async (req, res) => {
       });
     }
 
-    try {
-      let sendResponse;
-      try {
-        sendResponse = await axios.post(
-          `${API_BASE_URL}/conversations/${conversationUuid}/messages`,
-          { text: message },
-          { headers }
-        );
-      } catch (error) {
-        sendResponse = error.response;
-      }
+    const sendResponse = await fanvueRequest(
+      'post',
+      `/conversations/${conversationUuid}/messages`,
+      { data: { text: message }, headers }
+    );
 
-      const sendRateLimitError = handleRateLimit(sendResponse);
-      if (sendRateLimitError) {
-        return res.status(429).json(sendRateLimitError);
-      }
+    const sendRateLimitError = handleRateLimit(sendResponse);
+    if (sendRateLimitError) {
+      return res.status(429).json(sendRateLimitError);
+    }
 
-      if (sendResponse.status === 200 || sendResponse.status === 201) {
-        return res.json({
-          response: `Message sent successfully! Your message: "${message}"`
-        });
-      }
-    } catch (error) {
-      console.log('Message send error:', error.response?.data || error.message);
+    if (sendResponse.status === 200 || sendResponse.status === 201) {
       return res.json({
-        response: `Your message: "${message}" was received. API response: ${error.response?.status || 'error'}`
+        response: `Message sent successfully! Your message: "${message}"`
       });
     }
 
