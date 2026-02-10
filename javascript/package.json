@@ -6,9 +6,9 @@
   "scripts": {
     "start": "node app.js",
     "dev": "node app.js",
-    "build:client": "cd client && npm run build",
-    "build": "npm run build:client",
-    "install:all": "npm install && cd client && npm install"
+    "build:client": "cd client && pnpm install && pnpm run build",
+    "build": "pnpm run build:client",
+    "postinstall": "cd client && pnpm install"
   },
   "keywords": [
     "fanvue",
