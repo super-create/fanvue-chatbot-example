@@ -2516,7 +2516,7 @@ app.post('/api/ai-generate-reply', async (req, res) => {
     return res.status(401).json({ error: 'Not authenticated' });
   }
 
-  const { conversationHistory, systemPrompt, userProfile, creatorProfile, subscriberMemory, conversationUuid, subscriberHandle, chatMedia } = req.body;
+  const { conversationHistory, systemPrompt, userProfile, creatorProfile, subscriberMemory, conversationUuid, subscriberHandle, chatMedia, preview } = req.body;
 
   if (!conversationHistory || !Array.isArray(conversationHistory)) {
     return res.status(400).json({ error: 'Conversation history is required' });
@@ -2852,6 +2852,18 @@ You are ${creatorName}. `;
 
           console.log('[AI Reply] AI wants to send PPV:', parsed.mediaToSend.shortId, 'at $' + ppvPrice, '(' + priceInCents + ' cents)');
 
+          // Preview mode: don't send, just return what would be sent
+          if (preview) {
+            console.log('[AI Reply] Preview mode - NOT sending PPV, returning mediaToSend');
+            return res.json({
+              reply: reply,
+              mediaRequestDetected: mediaRequest.detected,
+              mediaRequestType: mediaRequest.type,
+              mediaToSend: { uuid: mediaUuid, shortId: parsed.mediaToSend.shortId, type: 'ppv', price: ppvPrice },
+              note: 'Preview mode - PPV not sent yet'
+            });
+          }
+
           fanvueRequest('post', `/chats/${conversationUuid}/message`, {
             data: {
               text: reply || 'Here you go 😘',
@@ -2883,6 +2895,18 @@ You are ${creatorName}. `;
         } else {
           // Send as free media
           console.log('[AI Reply] AI wants to send FREE media:', parsed.mediaToSend.shortId, parsed.mediaToSend.uuid);
+
+          // Preview mode: don't send, just return what would be sent
+          if (preview) {
+            console.log('[AI Reply] Preview mode - NOT sending free media, returning mediaToSend');
+            return res.json({
+              reply: reply,
+              mediaRequestDetected: mediaRequest.detected,
+              mediaRequestType: mediaRequest.type,
+              mediaToSend: { uuid: mediaUuid, shortId: parsed.mediaToSend.shortId, type: 'free' },
+              note: 'Preview mode - free media not sent yet'
+            });
+          }
 
           fanvueRequest('post', `/chats/${conversationUuid}/message`, {
             data: {

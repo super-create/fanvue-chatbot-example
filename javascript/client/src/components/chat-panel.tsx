@@ -15,6 +15,7 @@ import {
   getConversations,
   getMessages,
   sendMessage,
+  sendMediaMessage,
   getChatMedia,
   getChatsSettings,
   getAISettings,
@@ -25,6 +26,7 @@ import {
   type Message,
   type UserSession,
   type CreatorPersona,
+  type MediaToSend,
 } from "@/lib/api"
 import { toast } from "sonner"
 
@@ -65,12 +67,13 @@ export function ChatPanel({
   const [aiSuggestion, setAiSuggestion] = useState<string>('')
   const [showSuggestion, setShowSuggestion] = useState(false)
   const [generatingSuggestion, setGeneratingSuggestion] = useState(false)
+  const [suggestionMediaToSend, setSuggestionMediaToSend] = useState<MediaToSend | null>(null)
 
   // Full-auto mode state
   const [autoReplyText, setAutoReplyText] = useState<string>('')
   const [showPreview, setShowPreview] = useState(false)
   const [previewCountdown, setPreviewCountdown] = useState<number>(0)
-  const [previewMediaSent, setPreviewMediaSent] = useState<{ uuid: string; shortId: string; type: string; price?: number } | null>(null)
+  const [previewMediaToSend, setPreviewMediaToSend] = useState<MediaToSend | null>(null)
   const [generatingPreview, setGeneratingPreview] = useState(false)
 
   // Tracking refs (not state - they don't affect rendering)
@@ -109,7 +112,7 @@ export function ChatPanel({
   const hidePreview = useCallback(() => {
     setShowPreview(false)
     setAutoReplyText('')
-    setPreviewMediaSent(null)
+    setPreviewMediaToSend(null)
     setPreviewCountdown(0)
     cancelPendingReply()
   }, [cancelPendingReply])
@@ -234,6 +237,7 @@ export function ChatPanel({
     setGeneratingSuggestion(true)
     setShowSuggestion(true)
     setAiSuggestion('Generating suggestion...')
+    setSuggestionMediaToSend(null)
 
     try {
       await loadAIContext()
@@ -253,6 +257,7 @@ export function ChatPanel({
       // Only apply if still on the same conversation
       if (convUuid === selectedConversation) {
         setAiSuggestion(result.reply)
+        setSuggestionMediaToSend(result.mediaToSend || null)
       }
     } catch {
       if (convUuid === selectedConversation) {
@@ -266,10 +271,16 @@ export function ChatPanel({
   const handleSendSuggestion = async () => {
     if (!aiSuggestion.trim() || !selectedConversation) return
     try {
-      await sendMessage(selectedConversation, aiSuggestion)
+      if (suggestionMediaToSend) {
+        // Send media + text together via send-media endpoint
+        await sendMediaMessage(selectedConversation, suggestionMediaToSend.uuid, aiSuggestion, suggestionMediaToSend.price)
+      } else {
+        await sendMessage(selectedConversation, aiSuggestion)
+      }
       await trackAIMessage(selectedConversation)
       setShowSuggestion(false)
       setAiSuggestion('')
+      setSuggestionMediaToSend(null)
       shouldScrollRef.current = true
       await loadMessages(selectedConversation)
       toast.success('AI suggestion sent')
@@ -282,11 +293,13 @@ export function ChatPanel({
     setInputMessage(aiSuggestion)
     setShowSuggestion(false)
     setAiSuggestion('')
+    setSuggestionMediaToSend(null)
   }
 
   const handleDismissSuggestion = () => {
     setShowSuggestion(false)
     setAiSuggestion('')
+    setSuggestionMediaToSend(null)
   }
 
   // --- Full Auto Mode Functions ---
@@ -306,14 +319,14 @@ export function ChatPanel({
     }, 1000)
   }
 
-  const sendPreviewedReply = async (convUuid: string, mediaSent: { uuid: string; shortId: string; type: string; price?: number } | null) => {
+  const sendPreviewedReply = async (convUuid: string, mediaToSend: MediaToSend | null) => {
     try {
       const textToSend = autoReplyTextRef.current
       if (!textToSend.trim()) { hidePreview(); return }
 
-      if (mediaSent) {
-        // Media was already sent by the backend with the AI generation
-        console.log('[AI Preview] Media already sent:', mediaSent.shortId)
+      if (mediaToSend) {
+        // Send media + text together via send-media endpoint
+        await sendMediaMessage(convUuid, mediaToSend.uuid, textToSend, mediaToSend.price)
       } else {
         await sendMessage(convUuid, textToSend)
       }
@@ -335,7 +348,7 @@ export function ChatPanel({
     setGeneratingPreview(true)
     setShowPreview(true)
     setAutoReplyText('')
-    setPreviewMediaSent(null)
+    setPreviewMediaToSend(null)
 
     try {
       await loadAIContext()
@@ -359,18 +372,18 @@ export function ChatPanel({
       }
 
       setAutoReplyText(result.reply)
-      setPreviewMediaSent(result.mediaSent || null)
+      setPreviewMediaToSend(result.mediaToSend || null)
       setGeneratingPreview(false)
       startCountdown(delaySeconds)
 
-      const mediaSent = result.mediaSent || null
+      const mediaToSend = result.mediaToSend || null
 
       pendingAIReplyRef.current = setTimeout(async () => {
         if (autoReplyCancelledRef.current) {
           hidePreview()
           return
         }
-        await sendPreviewedReply(convUuid, mediaSent)
+        await sendPreviewedReply(convUuid, mediaToSend)
       }, delaySeconds * 1000)
 
     } catch {
@@ -382,7 +395,7 @@ export function ChatPanel({
 
   const handleSendNow = async () => {
     cancelPendingReply()
-    await sendPreviewedReply(selectedConversation, previewMediaSent)
+    await sendPreviewedReply(selectedConversation, previewMediaToSend)
   }
 
   const handleCancelAutoReply = () => {
@@ -679,7 +692,11 @@ export function ChatPanel({
       {showSuggestion && (
         <div className="border border-blue-500/30 bg-blue-500/10 rounded-lg space-y-2" style={{ margin: '0 10px 8px', padding: '12px' }}>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-blue-400">AI Suggestion</span>
+            <span className="text-xs font-medium text-blue-400">
+              {suggestionMediaToSend
+                ? `AI Suggestion (with ${suggestionMediaToSend.shortId} ${suggestionMediaToSend.type === 'ppv' ? 'PPV $' + suggestionMediaToSend.price : 'media'})`
+                : 'AI Suggestion'}
+            </span>
             {generatingSuggestion && (
               <Loader2 className="h-3 w-3 animate-spin text-blue-400" />
             )}
@@ -728,8 +745,8 @@ export function ChatPanel({
             <span className="text-xs font-medium text-orange-400">
               {generatingPreview
                 ? 'Generating preview...'
-                : previewMediaSent
-                  ? `Preview (with ${previewMediaSent.shortId} ${previewMediaSent.type === 'ppv' ? 'PPV $' + previewMediaSent.price : 'media'}):`
+                : previewMediaToSend
+                  ? `Preview (with ${previewMediaToSend.shortId} ${previewMediaToSend.type === 'ppv' ? 'PPV $' + previewMediaToSend.price : 'media'}):`
                   : 'Preview:'}
             </span>
             <div className="flex items-center gap-2">

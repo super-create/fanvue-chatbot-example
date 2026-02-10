@@ -297,9 +297,17 @@ export interface AISettings {
   aiModel: string
 }
 
+export interface MediaToSend {
+  uuid: string
+  shortId: string
+  type: string
+  price?: number
+}
+
 export interface AIGenerateReplyResponse {
   reply: string
-  mediaSent?: { uuid: string; shortId: string; type: string; price?: number } | null
+  mediaSent?: MediaToSend | null
+  mediaToSend?: MediaToSend | null
   mediaRequestDetected: boolean
   mediaRequestType?: string
 }
@@ -333,14 +341,34 @@ export async function generateAIReply(payload: {
   conversationUuid: string
   subscriberHandle: string | null
   chatMedia: MediaAttachment[]
+  preview?: boolean
 }): Promise<AIGenerateReplyResponse> {
   const res = await fetch(`${API_BASE}/api/ai-generate-reply`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
+    body: JSON.stringify({ ...payload, preview: true })
   })
   if (!res.ok) throw new Error('Failed to generate AI reply')
   return await res.json()
+}
+
+export async function sendMediaMessage(conversationUuid: string, mediaUuid: string, message: string, price?: number): Promise<{ success: boolean }> {
+  const res = await fetch(`${API_BASE}/api/send-media`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      conversationUuid,
+      mediaUuid,
+      message,
+      price: price || 0,
+    })
+  })
+  if (res.status === 401) {
+    window.location.href = '/login'
+    return { success: false }
+  }
+  if (!res.ok) throw new Error('Failed to send media')
+  return { success: true }
 }
 
 export async function trackAIMessage(conversationUuid: string): Promise<void> {
