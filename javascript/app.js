@@ -81,26 +81,10 @@ const sessionConfig = {
   }
 };
 
-if (process.env.SUPABASE_CONNECTION_STRING) {
-  try {
-    const pgSession = require('connect-pg-simple')(session);
-    // Supabase requires SSL — append sslmode=require to the connection string
-    let conString = process.env.SUPABASE_CONNECTION_STRING;
-    if (!conString.includes('sslmode=')) {
-      conString += (conString.includes('?') ? '&' : '?') + 'sslmode=require';
-    }
-    sessionConfig.store = new pgSession({
-      conString,
-      tableName: 'session',
-      createTableIfMissing: false
-    });
-    console.log('[Session] Using PostgreSQL session store (SSL)');
-  } catch (err) {
-    console.error('[Session] PG session store failed, falling back to in-memory:', err.message);
-  }
-} else {
-  console.log('[Session] WARNING: Using in-memory session store (sessions lost on restart)');
-}
+// NOTE: PG session store disabled — using in-memory sessions.
+// In-memory sessions are lost on Railway restart (redeploy) but are reliable.
+// TODO: re-enable PG session store once SSL config is verified.
+console.log('[Session] Using in-memory session store');
 
 app.use(session(sessionConfig));
 
