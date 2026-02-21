@@ -42,10 +42,19 @@ export interface Message {
   }
 }
 
+export interface SubscriptionInfo {
+  status: 'none' | 'trialing' | 'active' | 'cancelled' | 'expired'
+  plan?: string | null
+  trialEndsAt?: string | null
+  currentPeriodEnd?: string | null
+}
+
 export interface UserSession {
   loggedIn: boolean
   username?: string
   userUuid?: string
+  userId?: string
+  subscription?: SubscriptionInfo
 }
 
 export interface SubscriberProfile {
@@ -82,6 +91,12 @@ export async function checkSession(): Promise<UserSession> {
   } catch {
     return { loggedIn: false }
   }
+}
+
+// Initiate Paystack checkout — returns the URL to redirect the user to
+export async function startSubscription(): Promise<{ authorization_url: string } | { error: string }> {
+  const res = await fetch(`${API_BASE}/api/subscribe`, { method: 'POST' })
+  return await res.json()
 }
 
 export async function getConversations(): Promise<Conversation[]> {

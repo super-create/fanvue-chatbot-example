@@ -4,9 +4,16 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 // Initialize Supabase client
+// Use service role key for server-side access (bypasses RLS).
+// Falls back to anon key for backwards compatibility.
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.warn('[DB] WARNING: Using SUPABASE_ANON_KEY. Set SUPABASE_SERVICE_ROLE_KEY for production.');
+}
+
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
+  supabaseKey
 );
 
 // Initialize database tables

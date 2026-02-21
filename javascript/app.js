@@ -19,6 +19,7 @@ const {
   fulfillContentRequest,
   dismissContentRequest
 } = require('./database/content-requests');
+const { trackAIRequest, checkUsageLimits } = require('./database/usage');
 
 // Import service modules
 const {
@@ -47,18 +48,69 @@ const {
 
 // Import route modules
 const { createAuthRoutes } = require('./routes/auth');
+const { paymentsRouter, paystackWebhookHandler } = require('./routes/payments');
+
+// Import middleware
+const { requireAuth } = require('./middleware/require-auth');
+const { requireSubscription } = require('./middleware/require-subscription');
+const { globalApiLimiter, aiLimiter, authLimiter } = require('./middleware/rate-limit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy (Railway runs behind a reverse proxy)
+app.set('trust proxy', 1);
+
+// *** PAYSTACK WEBHOOK MUST BE BEFORE express.json() ***
+// Paystack signature verification requires the raw request body (Buffer).
+// express.json() would parse it into an object, destroying the raw bytes.
+app.post('/webhook/paystack', express.raw({ type: 'application/json' }), paystackWebhookHandler);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(session({
+
+// Session store: use PostgreSQL via Supabase if connection string is available
+const sessionConfig = {
   secret: process.env.SESSION_SECRET || 'dev-secret-change-in-production',
   resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false }
-}));
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+  }
+};
+
+if (process.env.SUPABASE_CONNECTION_STRING) {
+  const pgSession = require('connect-pg-simple')(session);
+  sessionConfig.store = new pgSession({
+    conString: process.env.SUPABASE_CONNECTION_STRING,
+    tableName: 'session',
+    createTableIfMissing: false
+  });
+  console.log('[Session] Using PostgreSQL session store');
+} else {
+  console.log('[Session] WARNING: Using in-memory session store (sessions lost on restart)');
+}
+
+app.use(session(sessionConfig));
+
+// Rate limiting
+app.use('/api/', globalApiLimiter);
+app.use('/login', authLimiter);
+app.use('/callback', authLimiter);
+app.use('/api/ai-generate-reply', aiLimiter);
+app.use('/api/generate-user-profile', aiLimiter);
+app.use('/api/subscriber-memory', aiLimiter);
+
+// Subscription gate: protect all /api/* routes except public ones
+const PUBLIC_API_ROUTES = ['/api/session', '/api/refresh-token', '/api/subscription', '/api/subscribe'];
+app.use('/api/', (req, res, next) => {
+  if (PUBLIC_API_ROUTES.some(route => req.path === route || req.originalUrl === route)) {
+    return next();
+  }
+  return requireSubscription(req, res, next);
+});
 
 // Serve static files from React build (client/dist) - new UI
 app.use(express.static(path.join(__dirname, 'client', 'dist')));
@@ -1833,10 +1885,18 @@ app.get('/api/session', async (req, res) => {
 
     if (profileResponse?.status === 200) {
       const userInfo = profileResponse.data;
+      const subscription = req.session.subscription || { status: 'none' };
       return res.json({
         loggedIn: true,
         username: userInfo.username || userInfo.email || 'User',
-        userUuid: userInfo.uuid
+        userUuid: userInfo.uuid,
+        userId: req.session.userId || null,
+        subscription: {
+          status: subscription.status || 'none',
+          plan: subscription.plan || null,
+          trialEndsAt: subscription.trial_ends_at || null,
+          currentPeriodEnd: subscription.current_period_end || null
+        }
       });
     }
 
@@ -2522,6 +2582,20 @@ app.post('/api/ai-generate-reply', async (req, res) => {
     return res.status(400).json({ error: 'Conversation history is required' });
   }
 
+  // Check usage limits before making expensive AI call
+  if (req.session.userId) {
+    const plan = req.session.subscription?.plan || 'starter';
+    const { allowed, usage, limits } = await checkUsageLimits(req.session.userId, plan);
+    if (!allowed) {
+      return res.status(429).json({
+        error: 'Monthly AI request limit reached',
+        usage,
+        limits,
+        message: `You've used ${usage.ai_requests}/${limits.ai_requests} AI requests this month.`
+      });
+    }
+  }
+
   try {
     // Get media descriptions for subscriber messages (if media was provided)
     let mediaDescriptions = {};
@@ -2834,6 +2908,14 @@ You are ${creatorName}. `;
     });
 
     let reply = completion.choices[0]?.message?.content || '';
+
+    // Track AI usage for billing/limits
+    if (req.session.userId) {
+      const tokensUsed = (completion.usage?.total_tokens) || 0;
+      trackAIRequest(req.session.userId, tokensUsed).catch(err =>
+        console.error('[Usage] Failed to track AI request:', err.message)
+      );
+    }
 
     // Check if AI wants to send media (free or PPV)
     let mediaSent = null;
@@ -4991,6 +5073,9 @@ const authRoutes = createAuthRoutes({
 });
 app.use('/', authRoutes);
 
+// Mount payment routes (/api/subscribe, /api/subscription, /subscribe/callback)
+app.use('/', paymentsRouter);
+
 // ============================================
 // SERVE REACT BUILD (Production)
 // ============================================
@@ -5003,7 +5088,8 @@ app.use(express.static(clientBuildPath));
 app.get('*', (req, res, next) => {
   // Skip API routes and auth routes
   if (req.path.startsWith('/api/') || req.path.startsWith('/webhook') ||
-      req.path === '/login' || req.path === '/logout' || req.path === '/callback') {
+      req.path === '/login' || req.path === '/logout' || req.path === '/callback' ||
+      req.path === '/subscribe/callback') {
     return next();
   }
   // Serve React app

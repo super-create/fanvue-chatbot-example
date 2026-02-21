@@ -7,6 +7,8 @@ const router = express.Router();
 const { fanvueRequest } = require('../services/fanvue-api');
 const { getAISettings } = require('../database/ai-settings');
 const { getCreatorPersona } = require('../database/personas');
+const { upsertUser } = require('../database/users');
+const { getSubscription, isSubscriptionActive } = require('../database/subscriptions');
 
 // PKCE helpers
 function base64url(input) {
@@ -169,7 +171,7 @@ function createAuthRoutes(config) {
       req.session.codeVerifier = null;
       req.session.state = null;
 
-      // Fetch user profile to get email
+      // Fetch user profile to get email and identity
       try {
         const profileResponse = await axios.get(`${API_BASE_URL}/users/me`, {
           headers: {
@@ -179,8 +181,32 @@ function createAuthRoutes(config) {
         });
 
         const userEmail = profileResponse.data.email;
+        const fanvueUserUuid = profileResponse.data.uuid;
+        const fanvueHandle = profileResponse.data.username || profileResponse.data.handle;
         req.session.userEmail = userEmail;
+        req.session.fanvueUserUuid = fanvueUserUuid;
         console.log('[Auth] User logged in:', userEmail);
+
+        // Upsert user record in our database
+        const user = await upsertUser({
+          fanvueUserUuid,
+          email: userEmail,
+          handle: fanvueHandle
+        });
+
+        if (user) {
+          req.session.userId = user.id;
+          console.log('[Auth] User record:', user.id);
+
+          // Load subscription status
+          const subscription = await getSubscription(user.id);
+          req.session.subscription = subscription || { status: 'none' };
+          if (subscription) {
+            console.log('[Auth] Subscription status:', subscription.status);
+          } else {
+            console.log('[Auth] No subscription found - user needs to subscribe');
+          }
+        }
 
         // Load user's persona (if they have one)
         const persona = await getCreatorPersona(userEmail);

@@ -7,6 +7,7 @@ import { AISettingsModal } from "@/components/ai-settings-modal"
 import { MediaControlModal } from "@/components/media-control-modal"
 import { AnalyticsModal } from "@/components/analytics-modal"
 import { ChatsControlModal } from "@/components/chats-control-modal"
+import { PaywallPage } from "@/components/paywall-page"
 import { Toaster } from "@/components/ui/sonner"
 import { Button } from "@/components/ui/button"
 import { checkSession, type UserSession } from "@/lib/api"
@@ -44,7 +45,7 @@ function App() {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-[#121212]">
         <div className="text-center space-y-4">
-          <h1 className="text-xl font-bold text-white">Fanvue Chatbot</h1>
+          <h1 className="text-xl font-bold text-white">Fanvue AI Assistant</h1>
           <p className="text-[#888] text-sm">Please log in to continue</p>
           <Button
             onClick={() => window.location.href = '/login'}
@@ -55,6 +56,19 @@ function App() {
           </Button>
         </div>
       </div>
+    )
+  }
+
+  // Show paywall if logged in but no active subscription
+  const subStatus = session.subscription?.status
+  const hasActiveSubscription = subStatus === 'active' || subStatus === 'trialing'
+
+  if (!hasActiveSubscription) {
+    return (
+      <>
+        <PaywallPage username={session.username} />
+        <Toaster />
+      </>
     )
   }
 
