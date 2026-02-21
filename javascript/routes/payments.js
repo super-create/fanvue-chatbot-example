@@ -34,6 +34,8 @@ router.post('/api/subscribe', async (req, res) => {
       },
       body: JSON.stringify({
         email,
+        amount: process.env.PAYSTACK_PLAN_AMOUNT,   // required by Paystack even when using plan
+        currency: process.env.PAYSTACK_CURRENCY || 'KES',
         plan: process.env.PAYSTACK_PLAN_CODE,
         callback_url: callbackUrl,
         metadata: {
