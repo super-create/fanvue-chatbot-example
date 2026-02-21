@@ -21,12 +21,23 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [activeModal, setActiveModal] = useState<ModalType>(null)
   const [settingsVersion, setSettingsVersion] = useState(0)
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth)
 
   useEffect(() => {
     checkSession()
       .then(setSession)
       .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    const handler = () => setWindowWidth(window.innerWidth)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
+
+  // Breakpoints: hide creator panel below 1200px, subscriber panel below 900px
+  const showSubscriberPanel = windowWidth >= 900
+  const showCreatorPanel = windowWidth >= 1200
 
   // Show loading spinner while checking session
   if (loading) {
@@ -72,11 +83,11 @@ function App() {
           settingsVersion={settingsVersion}
         />
 
-        {/* Column 3: Subscriber Profile Panel */}
-        <SubscriberPanel conversationUuid={selectedConversation} />
+        {/* Column 3: Subscriber Profile Panel — hidden below 900px */}
+        {showSubscriberPanel && <SubscriberPanel conversationUuid={selectedConversation} />}
 
-        {/* Column 4: Creator Persona Panel */}
-        <CreatorPanel />
+        {/* Column 4: Creator Persona Panel — hidden below 1200px */}
+        {showCreatorPanel && <CreatorPanel />}
       </div>
 
       {/* Modals */}
