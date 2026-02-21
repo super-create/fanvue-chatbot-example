@@ -8,10 +8,10 @@ import { MediaControlModal } from "@/components/media-control-modal"
 import { AnalyticsModal } from "@/components/analytics-modal"
 import { ChatsControlModal } from "@/components/chats-control-modal"
 import { PaywallPage } from "@/components/paywall-page"
+import { LandingPage } from "@/components/landing-page"
 import { Toaster } from "@/components/ui/sonner"
-import { Button } from "@/components/ui/button"
 import { checkSession, type UserSession } from "@/lib/api"
-import { LogIn, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
 
 export type ModalType = "ai-mode" | "configure" | "media" | "analytics" | "chats" | null
 
@@ -40,23 +40,9 @@ function App() {
     )
   }
 
-  // Show login screen if not authenticated
+  // Show landing page if not authenticated
   if (!session?.loggedIn) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-[#121212]">
-        <div className="text-center space-y-4">
-          <h1 className="text-xl font-bold text-white">Fanvue AI Assistant</h1>
-          <p className="text-[#888] text-sm">Please log in to continue</p>
-          <Button
-            onClick={() => window.location.href = '/login'}
-            className="bg-[#00c853] hover:bg-[#00a843] text-white h-9 px-4"
-          >
-            <LogIn className="h-4 w-4 mr-2" />
-            Login with Fanvue
-          </Button>
-        </div>
-      </div>
-    )
+    return <LandingPage />
   }
 
   // Show paywall if logged in but no active subscription
