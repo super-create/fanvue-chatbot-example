@@ -108,7 +108,7 @@ function App() {
         open={activeModal === "configure"}
         onOpenChange={(open) => setActiveModal(open ? "configure" : null)}
       >
-        <DialogContent className="p-0 max-w-sm max-h-[90vh] overflow-hidden bg-[#1a1a1a] border-[#2a2a2a]" style={{ padding: 0 }}>
+        <DialogContent className="p-0 max-w-sm bg-[#1a1a1a] border-[#2a2a2a]" style={{ padding: 0, maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
           <CreatorPanel />
         </DialogContent>
       </Dialog>

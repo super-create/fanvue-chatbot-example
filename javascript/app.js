@@ -1863,43 +1863,32 @@ app.post('/webhook', async (req, res) => {
 });
 
 // GET /api/session - Check if user is logged in (for React app)
-app.get('/api/session', async (req, res) => {
+// Uses cached session data — no external API call on every page load
+app.get('/api/session', (req, res) => {
   if (!req.session.access_token) {
     return res.json({ loggedIn: false });
   }
 
   try {
-    const profileResponse = await fanvueRequest('get', '/users/me', {
-      headers: {
-        'Authorization': `Bearer ${req.session.access_token}`,
-        'X-Fanvue-API-Version': process.env.API_VERSION || '2025-06-26'
+    // All data needed was cached during OAuth login — return instantly
+    const rawUsername = req.session.userEmail || 'User';
+    const username = rawUsername.includes('@') ? rawUsername.split('@')[0] : rawUsername;
+    const subscription = req.session.subscription || { status: 'none' };
+
+    return res.json({
+      loggedIn: true,
+      username,
+      userUuid: req.session.fanvueUserUuid || null,
+      userId: req.session.userId || null,
+      subscription: {
+        status: subscription.status || 'none',
+        plan: subscription.plan || null,
+        trialEndsAt: subscription.trial_ends_at || null,
+        currentPeriodEnd: subscription.current_period_end || null
       }
     });
-
-    if (profileResponse?.status === 200) {
-      const userInfo = profileResponse.data;
-      const subscription = req.session.subscription || { status: 'none' };
-      return res.json({
-        loggedIn: true,
-        username: (() => {
-          const raw = userInfo.username || userInfo.email || 'User';
-          // If it's an email address, show only the part before @
-          return raw.includes('@') ? raw.split('@')[0] : raw;
-        })(),
-        userUuid: userInfo.uuid,
-        userId: req.session.userId || null,
-        subscription: {
-          status: subscription.status || 'none',
-          plan: subscription.plan || null,
-          trialEndsAt: subscription.trial_ends_at || null,
-          currentPeriodEnd: subscription.current_period_end || null
-        }
-      });
-    }
-
-    return res.json({ loggedIn: true, username: 'User' });
   } catch (error) {
-    console.error('[Session] Error checking session:', error.message);
+    console.error('[Session] Error reading session:', error.message);
     return res.json({ loggedIn: false });
   }
 });
