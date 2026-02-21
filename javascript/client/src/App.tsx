@@ -10,6 +10,7 @@ import { ChatsControlModal } from "@/components/chats-control-modal"
 import { PaywallPage } from "@/components/paywall-page"
 import { LandingPage } from "@/components/landing-page"
 import { Toaster } from "@/components/ui/sonner"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { checkSession, type UserSession } from "@/lib/api"
 import { Loader2 } from "lucide-react"
 
@@ -98,9 +99,19 @@ function App() {
       />
 
       <AISettingsModal
-        open={activeModal === "ai-mode" || activeModal === "configure"}
-        onOpenChange={(open) => setActiveModal(open ? activeModal : null)}
+        open={activeModal === "ai-mode"}
+        onOpenChange={(open) => setActiveModal(open ? "ai-mode" : null)}
       />
+
+      {/* Configure AI → Creator Persona (accessible when panel is hidden on small screens) */}
+      <Dialog
+        open={activeModal === "configure"}
+        onOpenChange={(open) => setActiveModal(open ? "configure" : null)}
+      >
+        <DialogContent className="p-0 max-w-sm max-h-[90vh] overflow-hidden bg-[#1a1a1a] border-[#2a2a2a]" style={{ padding: 0 }}>
+          <CreatorPanel />
+        </DialogContent>
+      </Dialog>
 
       <MediaControlModal
         open={activeModal === "media"}

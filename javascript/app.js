@@ -1881,7 +1881,11 @@ app.get('/api/session', async (req, res) => {
       const subscription = req.session.subscription || { status: 'none' };
       return res.json({
         loggedIn: true,
-        username: userInfo.username || userInfo.email || 'User',
+        username: (() => {
+          const raw = userInfo.username || userInfo.email || 'User';
+          // If it's an email address, show only the part before @
+          return raw.includes('@') ? raw.split('@')[0] : raw;
+        })(),
         userUuid: userInfo.uuid,
         userId: req.session.userId || null,
         subscription: {
