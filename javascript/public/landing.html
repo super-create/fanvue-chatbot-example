@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FanBot — AI Chatbot for Fanvue Creators</title>
+  <meta name="description" content="FanBot connects to your Fanvue account and replies to your fans in your exact voice — 24/7. No missed messages. No burnout. Just more conversions and more money." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: #080808; color: #fff; font-family: system-ui, -apple-system, sans-serif; overflow-x: hidden; }
+    a { text-decoration: none; }
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    @keyframes glow { 0%,100%{box-shadow:0 0 20px rgba(0,200,83,0.25)} 50%{box-shadow:0 0 50px rgba(0,200,83,0.5)} }
+
+    .cta { transition: all 0.2s; }
+    .cta:hover { transform: translateY(-2px); box-shadow: 0 10px 35px rgba(0,200,83,0.45) !important; }
+    .ghost { transition: all 0.2s; }
+    .ghost:hover { background: rgba(255,255,255,0.05) !important; }
+    .faq-row { transition: background 0.15s; cursor: pointer; }
+    .faq-row:hover { background: #111 !important; }
+    .fc { transition: all 0.2s; }
+    .fc:hover { border-color: #00c853 !important; transform: translateY(-3px); }
+    .float-anim { animation: float 7s ease-in-out infinite; }
+    .glow-anim { animation: glow 3s ease-in-out infinite; }
+
+    .grad { background: linear-gradient(135deg, #00c853 0%, #7c3aed 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    /* Responsive */
+    @media (max-width: 700px) {
+      .hero-btns { flex-direction: column; align-items: center; }
+      .hero-btns a { width: 100%; text-align: center; }
+      .feat-row { flex-direction: column !important; }
+      .feat-row-rev { flex-direction: column !important; }
+      nav .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAVBAR ── -->
+<nav style="position:sticky;top:0;z-index:100;background:rgba(8,8,8,0.9);backdrop-filter:blur(12px);border-bottom:1px solid #161616;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#00c853,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:16px;">🤖</div>
+    <span style="font-size:18px;font-weight:800;letter-spacing:-0.02em;">FanBot</span>
+  </div>
+  <div class="nav-links" style="display:flex;align-items:center;gap:24px;">
+    <a href="#features" style="color:#777;font-size:14px;">Features</a>
+    <a href="#how-it-works" style="color:#777;font-size:14px;">How It Works</a>
+    <a href="#pricing" style="color:#777;font-size:14px;">Pricing</a>
+    <a href="/login" class="cta" style="background:#00c853;color:#000;font-weight:700;font-size:13px;padding:8px 18px;border-radius:8px;box-shadow:0 4px 16px rgba(0,200,83,0.25);">Get Started Free →</a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<div style="padding:90px 24px 60px;max-width:1100px;margin:0 auto;text-align:center;">
+  <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,200,83,0.08);border:1px solid rgba(0,200,83,0.2);color:#00c853;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:18px;letter-spacing:0.05em;">✦ &nbsp;Free 7-day trial — no credit card needed</div>
+  <h1 style="font-size:clamp(38px,6vw,74px);font-weight:900;line-height:1.08;letter-spacing:-0.03em;margin-bottom:22px;">
+    Stop Typing.<br /><span class="grad">Start Earning.</span>
+  </h1>
+  <p style="color:#999;font-size:clamp(16px,2vw,20px);max-width:600px;margin:0 auto 36px;line-height:1.65;">
+    FanBot connects to your Fanvue account and replies to your fans in your exact voice — 24/7. No missed messages. No burnout. Just more conversions and more money.
+  </p>
+  <div class="hero-btns" style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+    <a href="/login" class="cta" style="background:#00c853;color:#000;font-weight:800;font-size:16px;padding:14px 32px;border-radius:10px;box-shadow:0 4px 24px rgba(0,200,83,0.35);">Start Free Trial → Login with Fanvue</a>
+    <a href="#how-it-works" class="ghost" style="background:transparent;border:1px solid #2a2a2a;color:#fff;font-weight:600;font-size:16px;padding:14px 32px;border-radius:10px;">See How It Works</a>
+  </div>
+  <div style="margin-top:56px;display:flex;justify-content:center;" class="float-anim">
+    <!-- ChatAppMockup -->
+    <div style="background:#111;border:1px solid #222;border-radius:12px;overflow:hidden;font-family:system-ui,sans-serif;box-shadow:0 20px 60px rgba(0,0,0,0.7);width:100%;max-width:760px;">
+      <!-- Chrome bar -->
+      <div style="background:#1a1a1a;padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid #222;">
+        <div style="width:9px;height:9px;border-radius:50%;background:#ff5f57;"></div>
+        <div style="width:9px;height:9px;border-radius:50%;background:#febc2e;"></div>
+        <div style="width:9px;height:9px;border-radius:50%;background:#28c840;"></div>
+        <span style="margin-left:8px;color:#444;font-size:11px;">FanBot — Julie R.</span>
+      </div>
+      <div style="display:flex;height:380px;">
+        <!-- Sidebar icons -->
+        <div style="width:46px;background:#141414;border-right:1px solid #1e1e1e;display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:6px;">
+          <div style="width:28px;height:28px;border-radius:50%;background:#00c853;display:flex;align-items:center;justify-content:center;margin-bottom:8px;"><span style="color:#000;font-size:11px;font-weight:700;">J</span></div>
+          <div style="width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:#1e2e1e;font-size:14px;">💬</div>
+          <div style="width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;">🤖</div>
+          <div style="width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;">⚙️</div>
+          <div style="width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;">🖼️</div>
+          <div style="width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;">📊</div>
+        </div>
+        <!-- Conversation list -->
+        <div style="width:190px;border-right:1px solid #1e1e1e;display:flex;flex-direction:column;">
+          <div style="padding:8px 10px;border-bottom:1px solid #1a1a1a;display:flex;gap:6px;align-items:center;">
+            <div style="flex:1;background:#1e1e1e;border:1px solid #2a2a2a;border-radius:6px;padding:5px 8px;color:#666;font-size:11px;">appalling-mule-73</div>
+            <div style="background:#00c853;color:#000;font-size:10px;font-weight:700;padding:4px 8px;border-radius:6px;">↺</div>
+          </div>
+          <div style="padding:9px 10px;background:#1a2a1a;border-bottom:1px solid #141414;">
+            <div style="display:flex;justify-content:space-between;"><span style="color:#ddd;font-size:12px;font-weight:600;">alex_wl</span><span style="color:#555;font-size:10px;">1m</span></div>
+            <div style="display:flex;justify-content:space-between;margin-top:2px;"><span style="color:#666;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:130px;">I love your last pic 😍</span><span style="background:#00c853;color:#000;font-size:9px;font-weight:700;border-radius:8px;padding:1px 5px;">2</span></div>
+          </div>
+          <div style="padding:9px 10px;border-bottom:1px solid #141414;">
+            <div style="display:flex;justify-content:space-between;"><span style="color:#ddd;font-size:12px;font-weight:600;">TopFan_Mike</span><span style="color:#555;font-size:10px;">4m</span></div>
+            <div style="display:flex;justify-content:space-between;margin-top:2px;"><span style="color:#666;font-size:11px;">wanna see something? 🔥</span><span style="background:#00c853;color:#000;font-size:9px;font-weight:700;border-radius:8px;padding:1px 5px;">1</span></div>
+          </div>
+          <div style="padding:9px 10px;border-bottom:1px solid #141414;"><div style="display:flex;justify-content:space-between;"><span style="color:#ddd;font-size:12px;">crypto_k</span><span style="color:#555;font-size:10px;">15m</span></div><div style="color:#666;font-size:11px;margin-top:2px;">sent you a tip!</div></div>
+          <div style="padding:9px 10px;border-bottom:1px solid #141414;"><div style="display:flex;justify-content:space-between;"><span style="color:#ddd;font-size:12px;">darkwave9</span><span style="color:#555;font-size:10px;">1h</span></div><div style="color:#666;font-size:11px;margin-top:2px;">hey baby 😘</div></div>
+        </div>
+        <!-- Chat area -->
+        <div style="flex:1;display:flex;flex-direction:column;">
+          <div style="padding:8px 12px;border-bottom:1px solid #1e1e1e;display:flex;align-items:center;gap:8px;">
+            <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#00c853);"></div>
+            <div style="flex:1;"><div style="color:#fff;font-size:12px;font-weight:600;">alex_wl</div><div style="color:#00c853;font-size:10px;">● Online</div></div>
+            <div style="background:#00c853;color:#000;font-size:9px;font-weight:700;padding:2px 8px;border-radius:12px;">AI Auto ●</div>
+          </div>
+          <div style="flex:1;padding:12px;display:flex;flex-direction:column;gap:8px;overflow:hidden;">
+            <div style="align-self:flex-start;background:#1e1e1e;color:#ccc;font-size:12px;padding:7px 10px;border-radius:12px 12px 12px 3px;max-width:75%;">I love your last picture! You look so adorable!</div>
+            <div style="align-self:flex-end;background:linear-gradient(135deg,#005c25,#00c853);color:#fff;font-size:12px;padding:7px 10px;border-radius:12px 12px 3px 12px;max-width:75%;">Aww thanks hun! I've got a lot more where that came from lol! Wanna see something extra spicy? 😈</div>
+            <div style="align-self:flex-start;background:#1e1e1e;color:#ccc;font-size:12px;padding:7px 10px;border-radius:12px 12px 12px 3px;max-width:75%;">omg yes please 🔥🔥</div>
+            <div style="align-self:flex-end;max-width:80%;"><div style="background:#131f13;border:1px solid #00c853;color:#00c853;font-size:11px;padding:6px 12px;border-radius:12px 12px 3px 12px;display:flex;align-items:center;gap:6px;"><span style="width:6px;height:6px;border-radius:50%;background:#00c853;display:inline-block;flex-shrink:0;animation:pulse 1s infinite;"></span>AI is writing a reply...</div></div>
+          </div>
+          <div style="padding:8px 10px;border-top:1px solid #1e1e1e;display:flex;gap:8px;">
+            <div style="flex:1;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:8px 10px;color:#555;font-size:12px;">Type your message...</div>
+            <div style="background:#00c853;border-radius:8px;padding:8px 12px;color:#000;font-size:12px;font-weight:700;">Send</div>
+          </div>
+        </div>
+        <!-- Subscriber panel -->
+        <div style="width:200px;border-left:1px solid #1e1e1e;display:flex;flex-direction:column;">
+          <div style="padding:10px;border-bottom:1px solid #1e1e1e;">
+            <div style="color:#888;font-size:11px;margin-bottom:8px;">Subscriber</div>
+            <div style="display:flex;gap:5px;margin-bottom:10px;">
+              <div style="flex:1;background:#00c853;color:#000;font-size:10px;font-weight:700;padding:6px 4px;border-radius:6px;text-align:center;">🧠 Memory</div>
+              <div style="flex:1;background:#1e1e1e;color:#888;font-size:10px;padding:6px 4px;border-radius:6px;text-align:center;">⚡ Profile</div>
+            </div>
+            <div style="background:#111;border:1px solid #00c853;border-radius:6px;padding:8px;margin-bottom:8px;">
+              <div style="color:#00c853;font-size:9px;font-weight:700;margin-bottom:4px;">🧠 AI Memory</div>
+              <div style="color:#888;font-size:10px;line-height:1.5;">Highly communicative. Interested in cooking. Open to travel. Expressed interest in meeting Julie.</div>
+            </div>
+            <div style="background:#1a1a1a;border-radius:6px;padding:5px 8px;margin-bottom:6px;">
+              <div style="color:#666;font-size:9px;margin-bottom:3px;">Monetization</div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:#aaa;font-size:10px;">Revenue:</span><span style="color:#00c853;font-size:10px;font-weight:600;">$47.00</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── STATS ── -->
+<div style="border-top:1px solid #141414;border-bottom:1px solid #141414;padding:28px 24px;">
+  <div style="max-width:900px;margin:0 auto;display:flex;justify-content:space-around;flex-wrap:wrap;gap:28px;">
+    <div style="text-align:center;"><div class="grad" style="font-size:32px;font-weight:900;">24/7</div><div style="color:#555;font-size:13px;margin-top:4px;">Auto-replies, even while you sleep</div></div>
+    <div style="text-align:center;"><div class="grad" style="font-size:32px;font-weight:900;">5 min</div><div style="color:#555;font-size:13px;margin-top:4px;">Setup time — seriously that fast</div></div>
+    <div style="text-align:center;"><div class="grad" style="font-size:32px;font-weight:900;">3×</div><div style="color:#555;font-size:13px;margin-top:4px;">More replies = more conversions</div></div>
+    <div style="text-align:center;"><div class="grad" style="font-size:32px;font-weight:900;">$0</div><div style="color:#555;font-size:13px;margin-top:4px;">Free for 7 days, no card needed</div></div>
+  </div>
+</div>
+
+<!-- ── PAIN POINTS ── -->
+<div style="padding:80px 24px;max-width:1100px;margin:0 auto;text-align:center;">
+  <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(248,113,113,0.06);border:1px solid rgba(248,113,113,0.15);color:#f87171;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:18px;letter-spacing:0.05em;">😩 &nbsp;Sound familiar?</div>
+  <h2 style="font-size:clamp(26px,4vw,48px);font-weight:800;margin-bottom:14px;letter-spacing:-0.02em;">Running an AI girlfriend account is <span class="grad">exhausting.</span></h2>
+  <p style="color:#777;font-size:16px;max-width:540px;margin:0 auto 48px;">Most creators burn out trying to keep up with hundreds of conversations a day. It doesn't have to be this hard.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;">
+    <div class="fc" style="background:#0c0c0c;border:1px solid #1a1a1a;border-radius:12px;padding:20px 18px;text-align:left;"><div style="font-size:26px;margin-bottom:10px;">😓</div><div style="color:#fff;font-weight:700;font-size:14px;margin-bottom:6px;">Drowning in DMs</div><div style="color:#666;font-size:13px;line-height:1.6;">200 unread messages. No idea where to start. Every unanswered fan is a missed sale.</div></div>
+    <div class="fc" style="background:#0c0c0c;border:1px solid #1a1a1a;border-radius:12px;padding:20px 18px;text-align:left;"><div style="font-size:26px;margin-bottom:10px;">🌙</div><div style="color:#fff;font-weight:700;font-size:14px;margin-bottom:6px;">Up Until 2am Replying</div><div style="color:#666;font-size:13px;line-height:1.6;">Your fans message at all hours. You can't sleep. You're terrified of losing subscribers.</div></div>
+    <div class="fc" style="background:#0c0c0c;border:1px solid #1a1a1a;border-radius:12px;padding:20px 18px;text-align:left;"><div style="font-size:26px;margin-bottom:10px;">💸</div><div style="color:#fff;font-weight:700;font-size:14px;margin-bottom:6px;">Losing Sales While You Sleep</div><div style="color:#666;font-size:13px;line-height:1.6;">A fan messages about PPV. You don't reply in time. They move on. That's money gone.</div></div>
+    <div class="fc" style="background:#0c0c0c;border:1px solid #1a1a1a;border-radius:12px;padding:20px 18px;text-align:left;"><div style="font-size:26px;margin-bottom:10px;">😶</div><div style="color:#fff;font-weight:700;font-size:14px;margin-bottom:6px;">Don't Know What To Say</div><div style="color:#666;font-size:13px;line-height:1.6;">Writer's block hits hard. Saying the same thing over and over doesn't convert fans into buyers.</div></div>
+    <div class="fc" style="background:#0c0c0c;border:1px solid #1a1a1a;border-radius:12px;padding:20px 18px;text-align:left;"><div style="font-size:26px;margin-bottom:10px;">🔁</div><div style="color:#fff;font-weight:700;font-size:14px;margin-bottom:6px;">Copying the Same Reply 50 Times</div><div style="color:#666;font-size:13px;line-height:1.6;">You're manually sending the same message to dozens of fans every single day. Total waste.</div></div>
+    <div class="fc" style="background:#0c0c0c;border:1px solid #1a1a1a;border-radius:12px;padding:20px 18px;text-align:left;"><div style="font-size:26px;margin-bottom:10px;">📉</div><div style="color:#fff;font-weight:700;font-size:14px;margin-bottom:6px;">Fans Go Cold Without You</div><div style="color:#666;font-size:13px;line-height:1.6;">Take one day off. Engagement drops. Subscribers cancel. You can never fully disconnect.</div></div>
+  </div>
+</div>
+
+<!-- ── SOLUTION ── -->
+<div style="padding:60px 24px;text-align:center;background:linear-gradient(180deg,#080808 0%,#0c180c 100%);">
+  <div style="max-width:680px;margin:0 auto;">
+    <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,200,83,0.08);border:1px solid rgba(0,200,83,0.2);color:#00c853;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:18px;letter-spacing:0.05em;">🤖 &nbsp;Meet FanBot</div>
+    <h2 style="font-size:clamp(26px,4vw,52px);font-weight:800;letter-spacing:-0.02em;margin-bottom:18px;">Your AI that works <span class="grad">while you don't.</span></h2>
+    <p style="color:#999;font-size:17px;line-height:1.7;">FanBot plugs into your Fanvue account and handles your chats for you. It learns exactly how you talk, remembers every fan's name and preferences, and replies in a way that feels 100% human. Your fans stay happy. Your income keeps growing. You get your life back.</p>
+  </div>
+</div>
+
+<!-- ── FEATURES ── -->
+<div id="features" style="padding:80px 24px;max-width:1100px;margin:0 auto;">
+  <div style="text-align:center;margin-bottom:60px;">
+    <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,200,83,0.08);border:1px solid rgba(0,200,83,0.2);color:#00c853;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:18px;letter-spacing:0.05em;">⚡ Features</div>
+    <h2 style="font-size:clamp(26px,4vw,48px);font-weight:800;letter-spacing:-0.02em;">Everything you need to run on autopilot</h2>
+  </div>
+
+  <!-- Feature 1: AI Chat -->
+  <div class="feat-row" style="display:flex;align-items:center;gap:56px;margin-bottom:90px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:280px;">
+      <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,200,83,0.08);border:1px solid rgba(0,200,83,0.2);color:#00c853;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:18px;letter-spacing:0.05em;">💬 AI Chat</div>
+      <h3 style="font-size:clamp(22px,3vw,36px);font-weight:800;margin-bottom:14px;line-height:1.15;letter-spacing:-0.02em;">AI that replies exactly like you</h3>
+      <p style="color:#999;font-size:15px;line-height:1.7;margin-bottom:18px;">Tell FanBot how you talk — your slang, your emojis, your vibe. It learns your style and replies to fans as if it's you. Fans can't tell the difference. They just think you're incredibly responsive.</p>
+      <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#00c853;font-weight:700;">✓</span> Learns your tone, language, and personality</div>
+      <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#00c853;font-weight:700;">✓</span> Uses your catchphrases and emoji style</div>
+      <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#00c853;font-weight:700;">✓</span> Handles flirting, PPV pushes, and casual chat</div>
+      <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#00c853;font-weight:700;">✓</span> Gets smarter the more you use it</div>
+    </div>
+    <div style="flex:1;min-width:300px;display:flex;justify-content:center;">
+      <!-- ChatAppMockup (compact) -->
+      <div style="background:#111;border:1px solid #222;border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.7);width:100%;max-width:760px;">
+        <div style="background:#1a1a1a;padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid #222;"><div style="width:9px;height:9px;border-radius:50%;background:#ff5f57;"></div><div style="width:9px;height:9px;border-radius:50%;background:#febc2e;"></div><div style="width:9px;height:9px;border-radius:50%;background:#28c840;"></div><span style="margin-left:8px;color:#444;font-size:11px;">FanBot — Julie R.</span></div>
+        <div style="display:flex;height:280px;">
+          <div style="width:46px;background:#141414;border-right:1px solid #1e1e1e;display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:6px;"><div style="width:28px;height:28px;border-radius:50%;background:#00c853;display:flex;align-items:center;justify-content:center;margin-bottom:8px;"><span style="color:#000;font-size:11px;font-weight:700;">J</span></div><div style="width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:#1e2e1e;font-size:14px;">💬</div><div style="width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;">🤖</div><div style="width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;">⚙️</div></div>
+          <div style="width:150px;border-right:1px solid #1e1e1e;display:flex;flex-direction:column;"><div style="padding:9px 10px;background:#1a2a1a;border-bottom:1px solid #141414;"><div style="display:flex;justify-content:space-between;"><span style="color:#ddd;font-size:12px;font-weight:600;">alex_wl</span><span style="color:#555;font-size:10px;">1m</span></div><div style="color:#666;font-size:11px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">I love your last pic 😍</div></div><div style="padding:9px 10px;border-bottom:1px solid #141414;"><div style="display:flex;justify-content:space-between;"><span style="color:#ddd;font-size:12px;">TopFan_Mike</span><span style="color:#555;font-size:10px;">4m</span></div><div style="color:#666;font-size:11px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">wanna see something? 🔥</div></div></div>
+          <div style="flex:1;display:flex;flex-direction:column;"><div style="padding:8px 12px;border-bottom:1px solid #1e1e1e;display:flex;align-items:center;gap:8px;"><div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#00c853);"></div><div style="flex:1;"><div style="color:#fff;font-size:12px;font-weight:600;">alex_wl</div><div style="color:#00c853;font-size:10px;">● Online</div></div><div style="background:#00c853;color:#000;font-size:9px;font-weight:700;padding:2px 8px;border-radius:12px;">AI Auto ●</div></div><div style="flex:1;padding:10px;display:flex;flex-direction:column;gap:7px;overflow:hidden;"><div style="align-self:flex-start;background:#1e1e1e;color:#ccc;font-size:11px;padding:6px 9px;border-radius:10px 10px 10px 3px;max-width:80%;">I love your last picture!</div><div style="align-self:flex-end;background:linear-gradient(135deg,#005c25,#00c853);color:#fff;font-size:11px;padding:6px 9px;border-radius:10px 10px 3px 10px;max-width:80%;">Aww thanks hun! 😈 Wanna see something extra spicy?</div><div style="align-self:flex-start;background:#1e1e1e;color:#ccc;font-size:11px;padding:6px 9px;border-radius:10px 10px 10px 3px;max-width:80%;">omg yes please 🔥</div></div><div style="padding:8px 10px;border-top:1px solid #1e1e1e;display:flex;gap:8px;"><div style="flex:1;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:7px;padding:7px 10px;color:#555;font-size:11px;">Type a message...</div><div style="background:#00c853;border-radius:7px;padding:7px 12px;color:#000;font-size:11px;font-weight:700;">Send</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature 2: AI Modes -->
+  <div class="feat-row-rev" style="display:flex;align-items:center;gap:56px;margin-bottom:90px;flex-wrap:wrap-reverse;">
+    <div style="flex:1;min-width:280px;display:flex;justify-content:center;">
+      <!-- AIModesMockup -->
+      <div style="background:#111;border:1px solid #222;border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.7);width:100%;max-width:480px;">
+        <div style="background:#1a1a1a;padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid #222;"><div style="width:9px;height:9px;border-radius:50%;background:#ff5f57;"></div><div style="width:9px;height:9px;border-radius:50%;background:#febc2e;"></div><div style="width:9px;height:9px;border-radius:50%;background:#28c840;"></div><span style="margin-left:8px;color:#444;font-size:11px;">FanBot — AI Settings</span></div>
+        <div style="padding:20px;">
+          <div style="color:#fff;font-size:15px;font-weight:700;margin-bottom:4px;">AI Settings</div>
+          <div style="color:#555;font-size:12px;margin-bottom:16px;">Choose how much control AI has over your messages</div>
+          <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;margin-bottom:8px;background:#151515;border:1px solid #222;border-radius:10px;"><div style="font-size:20px;margin-top:1px;">✍️</div><div style="flex:1;"><div style="color:#aaa;font-size:13px;font-weight:600;margin-bottom:3px;">Manual</div><div style="color:#666;font-size:11px;line-height:1.5;">You write all replies yourself. FanBot is off.</div></div></div>
+          <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;margin-bottom:8px;background:#151515;border:1px solid #222;border-radius:10px;"><div style="font-size:20px;margin-top:1px;">👁️</div><div style="flex:1;"><div style="color:#aaa;font-size:13px;font-weight:600;margin-bottom:3px;">Assisted</div><div style="color:#666;font-size:11px;line-height:1.5;">AI suggests a reply. You review and approve before it sends.</div></div></div>
+          <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;margin-bottom:8px;background:#151515;border:1px solid #222;border-radius:10px;"><div style="font-size:20px;margin-top:1px;">⚡</div><div style="flex:1;"><div style="color:#aaa;font-size:13px;font-weight:600;margin-bottom:3px;">Full Auto — Instant</div><div style="color:#666;font-size:11px;line-height:1.5;">AI replies immediately, 24/7. Fastest response time.</div></div></div>
+          <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;margin-bottom:8px;background:#0d1f0d;border:1px solid #00c853;border-radius:10px;"><div style="font-size:20px;margin-top:1px;">🧠</div><div style="flex:1;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><span style="color:#fff;font-size:13px;font-weight:600;">Full Auto — Natural Delays</span><span style="background:#00c853;color:#000;font-size:9px;font-weight:700;padding:1px 7px;border-radius:10px;">ACTIVE ✓</span></div><div style="color:#666;font-size:11px;line-height:1.5;">AI replies with human-like timing. Feels 100% real to fans.</div></div></div>
+          <div style="margin-top:14px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span style="color:#aaa;font-size:12px;font-weight:600;">AI Model</span><span style="color:#00c853;font-size:12px;">GPT-4o (Recommended)</span></div>
+            <div style="display:flex;justify-content:space-between;"><span style="color:#aaa;font-size:12px;font-weight:600;">Max Reply Tokens</span><span style="color:#ccc;font-size:12px;">150</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1;min-width:280px;">
+      <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);color:#a78bfa;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:18px;letter-spacing:0.05em;">🧠 AI Modes</div>
+      <h3 style="font-size:clamp(22px,3vw,36px);font-weight:800;margin-bottom:14px;line-height:1.15;letter-spacing:-0.02em;">You choose how much control the AI has</h3>
+      <p style="color:#999;font-size:15px;line-height:1.7;margin-bottom:18px;">Not ready to go fully automatic? No problem. FanBot has four modes so you stay in control at every level.</p>
+      <div style="margin-bottom:10px;padding:10px 12px;background:#0e0e0e;border:1px solid #1a1a1a;border-radius:8px;"><div style="color:#fff;font-size:13px;font-weight:600;margin-bottom:3px;">Manual</div><div style="color:#666;font-size:12px;">You write every reply yourself. AI is off.</div></div>
+      <div style="margin-bottom:10px;padding:10px 12px;background:#0e0e0e;border:1px solid #1a1a1a;border-radius:8px;"><div style="color:#fff;font-size:13px;font-weight:600;margin-bottom:3px;">Assisted</div><div style="color:#666;font-size:12px;">AI drafts replies. You review and approve each one before it sends.</div></div>
+      <div style="margin-bottom:10px;padding:10px 12px;background:#0e0e0e;border:1px solid #1a1a1a;border-radius:8px;"><div style="color:#fff;font-size:13px;font-weight:600;margin-bottom:3px;">Full Auto — Instant</div><div style="color:#666;font-size:12px;">AI replies the second a message arrives. Fastest response time.</div></div>
+      <div style="margin-bottom:10px;padding:10px 12px;background:#0e0e0e;border:1px solid #1a1a1a;border-radius:8px;"><div style="color:#fff;font-size:13px;font-weight:600;margin-bottom:3px;">Full Auto — Natural Delays</div><div style="color:#666;font-size:12px;">AI waits a human-like delay before replying. Feels 100% real to fans.</div></div>
+    </div>
+  </div>
+
+  <!-- Feature 3: Subscriber Memory -->
+  <div class="feat-row" style="display:flex;align-items:center;gap:56px;margin-bottom:90px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:280px;">
+      <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);color:#a78bfa;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:18px;letter-spacing:0.05em;">🧠 Smart Memory</div>
+      <h3 style="font-size:clamp(22px,3vw,36px);font-weight:800;margin-bottom:14px;line-height:1.15;letter-spacing:-0.02em;">Remembers every fan, every time</h3>
+      <p style="color:#999;font-size:15px;line-height:1.7;margin-bottom:18px;">FanBot builds a profile for every subscriber — what they like, what they've bought, what makes them tip. Every conversation feels personal, even when it's automated.</p>
+      <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#a78bfa;font-weight:700;">✓</span> Remembers past conversations</div>
+      <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#a78bfa;font-weight:700;">✓</span> Tracks what each fan has purchased</div>
+      <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#a78bfa;font-weight:700;">✓</span> Knows who's most likely to buy PPV</div>
+      <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#a78bfa;font-weight:700;">✓</span> Personalises every single reply</div>
+    </div>
+    <div style="flex:1;min-width:280px;display:flex;justify-content:center;">
+      <!-- SubscriberMockup -->
+      <div style="background:#111;border:1px solid #222;border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.7);width:100%;max-width:340px;">
+        <div style="background:#1a1a1a;padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid #222;"><div style="width:9px;height:9px;border-radius:50%;background:#ff5f57;"></div><div style="width:9px;height:9px;border-radius:50%;background:#febc2e;"></div><div style="width:9px;height:9px;border-radius:50%;background:#28c840;"></div><span style="margin-left:8px;color:#444;font-size:11px;">FanBot — Subscriber Panel</span></div>
+        <div style="padding:16px;">
+          <div style="display:flex;gap:8px;margin-bottom:14px;"><div style="flex:1;background:#00c853;color:#000;font-size:12px;font-weight:700;padding:8px;border-radius:8px;text-align:center;">🧠 Memory</div><div style="flex:1;background:#1e1e1e;color:#888;font-size:12px;padding:8px;border-radius:8px;text-align:center;">⚡ Quick Profile</div></div>
+          <div style="background:#0d1a0d;border:1px solid #00c853;border-radius:8px;padding:12px;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;"><span style="font-size:12px;">🧠</span><span style="color:#00c853;font-size:11px;font-weight:700;">AI Memory</span></div>
+            <div style="color:#aaa;font-size:11px;line-height:1.6;">This individual is highly communicative and interested in making connections. They show a keen interest in cooking and are open to travel.</div>
+            <div style="margin-top:8px;"><div style="color:#888;font-size:11px;font-weight:600;margin-bottom:4px;">Facts:</div><div style="color:#777;font-size:10px;margin-bottom:2px;">▸ They love cooking pasta.</div><div style="color:#777;font-size:10px;margin-bottom:2px;">▸ They are willing to travel.</div><div style="color:#777;font-size:10px;margin-bottom:2px;">▸ Expressed interest in meeting.</div></div>
+          </div>
+          <div style="margin-bottom:10px;"><div style="color:#555;font-size:9px;font-weight:700;margin-bottom:5px;">⚡ QUICK PROFILE</div><div style="display:flex;flex-wrap:wrap;gap:5px;"><span style="color:#00c853;font-size:10px;background:rgba(0,200,83,0.06);border:1px solid rgba(0,200,83,0.15);border-radius:10px;padding:2px 8px;">cooking</span><span style="color:#00c853;font-size:10px;background:rgba(0,200,83,0.06);border:1px solid rgba(0,200,83,0.15);border-radius:10px;padding:2px 8px;">travel</span><span style="color:#00c853;font-size:10px;background:rgba(0,200,83,0.06);border:1px solid rgba(0,200,83,0.15);border-radius:10px;padding:2px 8px;">admiration</span></div></div>
+          <div style="background:#0a1f0a;border:1px solid #1e3a1e;border-radius:8px;padding:8px 12px;margin-bottom:12px;"><div style="color:#666;font-size:10px;margin-bottom:6px;font-weight:600;">Monetization</div><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="color:#666;font-size:11px;">Revenue:</span><span style="color:#00c853;font-size:11px;font-weight:600;">$127.00</span></div><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="color:#666;font-size:11px;">Purchases:</span><span style="color:#888;font-size:11px;">3</span></div><div style="display:flex;justify-content:space-between;"><span style="color:#666;font-size:11px;">Conversion:</span><span style="color:#888;font-size:11px;">68%</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature 4: Creator Persona -->
+  <div class="feat-row-rev" style="display:flex;align-items:center;gap:56px;margin-bottom:90px;flex-wrap:wrap-reverse;">
+    <div style="flex:1;min-width:280px;display:flex;justify-content:center;">
+      <!-- PersonaMockup -->
+      <div style="background:#111;border:1px solid #222;border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.7);width:100%;max-width:340px;">
+        <div style="background:#1a1a1a;padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid #222;"><div style="width:9px;height:9px;border-radius:50%;background:#ff5f57;"></div><div style="width:9px;height:9px;border-radius:50%;background:#febc2e;"></div><div style="width:9px;height:9px;border-radius:50%;background:#28c840;"></div><span style="margin-left:8px;color:#444;font-size:11px;">FanBot — Creator Persona</span></div>
+        <div style="padding:16px;">
+          <div style="color:#fff;font-size:15px;font-weight:700;margin-bottom:4px;">Creator Persona</div>
+          <div style="color:#555;font-size:11px;margin-bottom:14px;">AI Identity — who the AI acts as</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px;"><div style="flex:1;"><div style="color:#555;font-size:10px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px;">Name</div><div style="background:#1e1e1e;border:1px solid #2a2a2a;border-radius:7px;padding:8px 10px;color:#ccc;font-size:13px;">Julie</div></div><div style="width:60px;"><div style="color:#555;font-size:10px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px;">Age</div><div style="background:#1e1e1e;border:1px solid #2a2a2a;border-radius:7px;padding:8px 10px;color:#ccc;font-size:13px;">25</div></div></div>
+          <div style="margin-bottom:10px;"><div style="color:#555;font-size:10px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px;">Accent / Style</div><div style="background:#1e1e1e;border:1px solid #2a2a2a;border-radius:7px;padding:8px 10px;color:#ccc;font-size:13px;">British</div></div>
+          <div style="margin-bottom:10px;"><div style="color:#555;font-size:10px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px;">Location</div><div style="background:#1e1e1e;border:1px solid #2a2a2a;border-radius:7px;padding:8px 10px;color:#ccc;font-size:13px;">London</div></div>
+          <div style="height:1px;background:#1e1e1e;margin:12px 0;"></div>
+          <div style="margin-bottom:10px;"><div style="color:#555;font-size:10px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px;">Physical</div><div style="background:#1e1e1e;border:1px solid #2a2a2a;border-radius:7px;padding:8px 10px;color:#ccc;font-size:11px;line-height:1.5;">Sexy brunette with bangs and extremely large breasts</div></div>
+          <div style="margin-bottom:10px;"><div style="color:#555;font-size:10px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px;">Personality</div><div style="background:#1e1e1e;border:1px solid #2a2a2a;border-radius:7px;padding:8px 10px;color:#ccc;font-size:11px;line-height:1.5;">Flirty, playful, very sexual. Loves her fans.</div></div>
+          <div style="background:#00c853;color:#000;font-weight:700;font-size:13px;padding:9px;border-radius:8px;text-align:center;">💾 Save</div>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1;min-width:280px;">
+      <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);color:#f59e0b;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:18px;letter-spacing:0.05em;">🎭 Creator Persona</div>
+      <h3 style="font-size:clamp(22px,3vw,36px);font-weight:800;margin-bottom:14px;line-height:1.15;letter-spacing:-0.02em;">Build your AI twin in 5 minutes</h3>
+      <p style="color:#999;font-size:15px;line-height:1.7;margin-bottom:18px;">Tell FanBot who your character is — her name, age, personality, location, appearance, and backstory. The AI will use this to roleplay as her perfectly in every conversation.</p>
+      <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#f59e0b;font-weight:700;">✓</span> Name, age, location, accent</div>
+      <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#f59e0b;font-weight:700;">✓</span> Physical description for context</div>
+      <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#f59e0b;font-weight:700;">✓</span> Personality and vibe</div>
+      <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#f59e0b;font-weight:700;">✓</span> Custom facts and backstory</div>
+      <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#f59e0b;font-weight:700;">✓</span> Fully editable any time</div>
+    </div>
+  </div>
+
+  <!-- Feature 5: Media Control -->
+  <div class="feat-row" style="display:flex;align-items:center;gap:56px;margin-bottom:90px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:280px;">
+      <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);color:#f87171;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:18px;letter-spacing:0.05em;">🖼️ Media Control</div>
+      <h3 style="font-size:clamp(22px,3vw,36px);font-weight:800;margin-bottom:14px;line-height:1.15;letter-spacing:-0.02em;">AI knows your content and sells it for you</h3>
+      <p style="color:#999;font-size:15px;line-height:1.7;margin-bottom:18px;">Connect your Fanvue media vault and FanBot will suggest the right photos or videos at the right moment — free content to build connection, PPV content to build income.</p>
+      <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#f87171;font-weight:700;">✓</span> Reads your full Fanvue media vault</div>
+      <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#f87171;font-weight:700;">✓</span> Sends SFW content to build connection</div>
+      <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#f87171;font-weight:700;">✓</span> Suggests PPV at the perfect moment</div>
+      <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#f87171;font-weight:700;">✓</span> Tracks tip requests and responses</div>
+      <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#f87171;font-weight:700;">✓</span> Configurable folder naming convention</div>
+    </div>
+    <div style="flex:1;min-width:280px;display:flex;justify-content:center;">
+      <!-- MediaMockup -->
+      <div style="background:#111;border:1px solid #222;border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.7);width:100%;max-width:420px;">
+        <div style="background:#1a1a1a;padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid #222;"><div style="width:9px;height:9px;border-radius:50%;background:#ff5f57;"></div><div style="width:9px;height:9px;border-radius:50%;background:#febc2e;"></div><div style="width:9px;height:9px;border-radius:50%;background:#28c840;"></div><span style="margin-left:8px;color:#444;font-size:11px;">FanBot — Media Control</span></div>
+        <div style="padding:18px;">
+          <div style="color:#fff;font-size:15px;font-weight:700;margin-bottom:14px;">Media Control</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+            <div style="background:#151515;border:1px solid #222;border-radius:8px;padding:10px 12px;"><div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;"><span style="font-size:12px;">🖼️</span><span style="color:#555;font-size:9px;font-weight:700;">TOTAL MEDIA</span></div><div style="color:#7c3aed;font-size:22px;font-weight:800;">203</div></div>
+            <div style="background:#151515;border:1px solid #222;border-radius:8px;padding:10px 12px;"><div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;"><span style="font-size:12px;">📁</span><span style="color:#555;font-size:9px;font-weight:700;">SFW (FREE)</span></div><div style="color:#00c853;font-size:22px;font-weight:800;">11</div></div>
+            <div style="background:#151515;border:1px solid #222;border-radius:8px;padding:10px 12px;"><div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;"><span style="font-size:12px;">💰</span><span style="color:#555;font-size:9px;font-weight:700;">PPV (PAID)</span></div><div style="color:#f59e0b;font-size:22px;font-weight:800;">5</div></div>
+            <div style="background:#151515;border:1px solid #222;border-radius:8px;padding:10px 12px;"><div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;"><span style="font-size:12px;">📁</span><span style="color:#555;font-size:9px;font-weight:700;">UNCATEGORIZED</span></div><div style="color:#555;font-size:22px;font-weight:800;">187</div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #1a1a1a;"><div><div style="color:#ddd;font-size:13px;font-weight:500;">Vault Awareness</div><div style="color:#555;font-size:11px;">Allow AI to send media from your vault</div></div><div style="width:36px;height:20px;border-radius:10px;background:#00c853;position:relative;flex-shrink:0;"><div style="width:14px;height:14px;border-radius:50%;background:#fff;position:absolute;top:3px;left:18px;"></div></div></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #1a1a1a;"><div><div style="color:#ddd;font-size:13px;font-weight:500;">Tip Tracking</div><div style="color:#555;font-size:11px;">Track tip requests and responses</div></div><div style="width:36px;height:20px;border-radius:10px;background:#00c853;position:relative;flex-shrink:0;"><div style="width:14px;height:14px;border-radius:50%;background:#fff;position:absolute;top:3px;left:18px;"></div></div></div>
+          <div style="margin-top:12px;"><div style="color:#555;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px;">SFW Folder Prefix</div><div style="background:#1e1e1e;border:1px solid #2a2a2a;border-radius:7px;padding:8px 10px;color:#ccc;font-size:13px;margin-bottom:10px;">sfw</div><div style="color:#555;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px;">PPV Folder Prefix</div><div style="background:#1e1e1e;border:1px solid #2a2a2a;border-radius:7px;padding:8px 10px;color:#ccc;font-size:13px;margin-bottom:14px;">ppv</div><div style="background:#00c853;color:#000;font-weight:700;font-size:13px;padding:10px;border-radius:8px;text-align:center;">💾 Save Settings</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature 6: Analytics -->
+  <div class="feat-row-rev" style="display:flex;align-items:center;gap:56px;margin-bottom:60px;flex-wrap:wrap-reverse;">
+    <div style="flex:1;min-width:280px;display:flex;justify-content:center;">
+      <!-- AnalyticsMockup -->
+      <div style="background:#111;border:1px solid #222;border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.7);width:100%;max-width:480px;">
+        <div style="background:#1a1a1a;padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid #222;"><div style="width:9px;height:9px;border-radius:50%;background:#ff5f57;"></div><div style="width:9px;height:9px;border-radius:50%;background:#febc2e;"></div><div style="width:9px;height:9px;border-radius:50%;background:#28c840;"></div><span style="margin-left:8px;color:#444;font-size:11px;">FanBot — Analytics Dashboard</span></div>
+        <div style="padding:18px;">
+          <div style="color:#fff;font-size:15px;font-weight:700;margin-bottom:14px;">Analytics Dashboard</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
+            <div style="background:#151515;border:1px solid #222;border-radius:8px;padding:10px;"><div style="color:#444;font-size:8px;font-weight:700;margin-bottom:5px;">💬 MESSAGES SENT</div><div style="color:#7c3aed;font-size:18px;font-weight:800;">1,247</div></div>
+            <div style="background:#151515;border:1px solid #222;border-radius:8px;padding:10px;"><div style="color:#444;font-size:8px;font-weight:700;margin-bottom:5px;">📨 MESSAGES RECV</div><div style="color:#00c853;font-size:18px;font-weight:800;">3,891</div></div>
+            <div style="background:#151515;border:1px solid #222;border-radius:8px;padding:10px;"><div style="color:#444;font-size:8px;font-weight:700;margin-bottom:5px;">🤖 AI REPLIES</div><div style="color:#00c853;font-size:18px;font-weight:800;">1,189</div></div>
+            <div style="background:#151515;border:1px solid #222;border-radius:8px;padding:10px;"><div style="color:#444;font-size:8px;font-weight:700;margin-bottom:5px;">👥 ACTIVE CHATS</div><div style="color:#a78bfa;font-size:18px;font-weight:800;">47</div></div>
+            <div style="background:#151515;border:1px solid #222;border-radius:8px;padding:10px;"><div style="color:#444;font-size:8px;font-weight:700;margin-bottom:5px;">📈 AI USAGE</div><div style="color:#f59e0b;font-size:18px;font-weight:800;">95%</div></div>
+            <div style="background:#151515;border:1px solid #222;border-radius:8px;padding:10px;"><div style="color:#444;font-size:8px;font-weight:700;margin-bottom:5px;">📊 TOTAL MSGS</div><div style="color:#f87171;font-size:18px;font-weight:800;">5,138</div></div>
+          </div>
+          <div style="margin-bottom:10px;"><div style="color:#aaa;font-size:11px;font-weight:600;margin-bottom:8px;">Last 7 Days Activity</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;"><span style="color:#555;font-size:10px;width:28px;">Sun</span><div style="flex:1;height:6px;background:#1a1a1a;border-radius:3px;overflow:hidden;"><div style="width:44%;height:100%;background:linear-gradient(90deg,#7c3aed,#00c853);border-radius:3px;"></div></div><span style="color:#888;font-size:10px;width:28px;">142</span></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;"><span style="color:#555;font-size:10px;width:28px;">Mon</span><div style="flex:1;height:6px;background:#1a1a1a;border-radius:3px;overflow:hidden;"><div style="width:62%;height:100%;background:linear-gradient(90deg,#7c3aed,#00c853);border-radius:3px;"></div></div><span style="color:#888;font-size:10px;width:28px;">198</span></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;"><span style="color:#555;font-size:10px;width:28px;">Fri</span><div style="flex:1;height:6px;background:#1a1a1a;border-radius:3px;overflow:hidden;"><div style="width:97%;height:100%;background:linear-gradient(90deg,#7c3aed,#00c853);border-radius:3px;"></div></div><span style="color:#888;font-size:10px;width:28px;">312</span></div>
+          </div>
+          <div style="background:#151515;border:1px solid #1e1e1e;border-radius:8px;padding:10px;"><div style="color:#aaa;font-size:11px;font-weight:600;margin-bottom:8px;">Most Active Conversations</div><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="color:#555;font-size:11px;">#1</span><span style="color:#ccc;font-size:12px;flex:1;">alex_wl</span><span style="color:#888;font-size:11px;">312 msgs</span><span style="color:#00c853;font-size:11px;font-weight:600;">$127</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="color:#555;font-size:11px;">#2</span><span style="color:#ccc;font-size:12px;flex:1;">TopFan_Mike</span><span style="color:#888;font-size:11px;">241 msgs</span><span style="color:#00c853;font-size:11px;font-weight:600;">$94</span></div><div style="display:flex;align-items:center;gap:8px;"><span style="color:#555;font-size:11px;">#3</span><span style="color:#ccc;font-size:12px;flex:1;">crypto_k</span><span style="color:#888;font-size:11px;">198 msgs</span><span style="color:#00c853;font-size:11px;font-weight:600;">$203</span></div></div>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1;min-width:280px;">
+      <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);color:#f59e0b;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:18px;letter-spacing:0.05em;">📊 Analytics</div>
+      <h3 style="font-size:clamp(22px,3vw,36px);font-weight:800;margin-bottom:14px;line-height:1.15;letter-spacing:-0.02em;">Know exactly who's worth your time</h3>
+      <p style="color:#999;font-size:15px;line-height:1.7;margin-bottom:18px;">See which fans spend the most, which conversations earn the most, and how your AI is performing day by day. Stop guessing. Start focusing where it pays.</p>
+      <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#f59e0b;font-weight:700;">✓</span> Top spenders and revenue per fan</div>
+      <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#f59e0b;font-weight:700;">✓</span> Daily message and AI usage stats</div>
+      <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#f59e0b;font-weight:700;">✓</span> Most active conversation tracking</div>
+      <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#f59e0b;font-weight:700;">✓</span> Conversion rate monitoring</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── HOW IT WORKS ── -->
+<div id="how-it-works" style="background:#090909;padding:80px 24px;border-top:1px solid #141414;border-bottom:1px solid #141414;">
+  <div style="max-width:900px;margin:0 auto;text-align:center;">
+    <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,200,83,0.08);border:1px solid rgba(0,200,83,0.2);color:#00c853;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:18px;letter-spacing:0.05em;">🛠 Simple Setup</div>
+    <h2 style="font-size:clamp(26px,4vw,48px);font-weight:800;letter-spacing:-0.02em;margin-bottom:12px;">Up and running in <span class="grad">5 minutes</span></h2>
+    <p style="color:#666;font-size:16px;margin-bottom:52px;">No tech skills required. Seriously.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;">
+      <div style="background:#111;border:1px solid #1a1a1a;border-radius:14px;padding:28px 22px;position:relative;">
+        <div style="color:#1a1a1a;font-size:52px;font-weight:900;position:absolute;top:14px;right:18px;line-height:1;">01</div>
+        <div style="font-size:34px;margin-bottom:14px;">🔗</div>
+        <div style="color:#fff;font-weight:700;font-size:17px;margin-bottom:10px;">Connect your Fanvue</div>
+        <div style="color:#666;font-size:13px;line-height:1.7;">Click 'Login with Fanvue'. We connect securely using Fanvue's official login. Your password is never shared with us.</div>
+      </div>
+      <div style="background:#111;border:1px solid #1a1a1a;border-radius:14px;padding:28px 22px;position:relative;">
+        <div style="color:#1a1a1a;font-size:52px;font-weight:900;position:absolute;top:14px;right:18px;line-height:1;">02</div>
+        <div style="font-size:34px;margin-bottom:14px;">🎭</div>
+        <div style="color:#fff;font-weight:700;font-size:17px;margin-bottom:10px;">Set up your AI persona</div>
+        <div style="color:#666;font-size:13px;line-height:1.7;">Tell FanBot how you talk, your character's backstory, and what you sell. Takes 5 minutes. The AI uses this in every conversation.</div>
+      </div>
+      <div style="background:#111;border:1px solid #1a1a1a;border-radius:14px;padding:28px 22px;position:relative;">
+        <div style="color:#1a1a1a;font-size:52px;font-weight:900;position:absolute;top:14px;right:18px;line-height:1;">03</div>
+        <div style="font-size:34px;margin-bottom:14px;">✅</div>
+        <div style="color:#fff;font-weight:700;font-size:17px;margin-bottom:10px;">Turn it on and relax</div>
+        <div style="color:#666;font-size:13px;line-height:1.7;">Switch to Full Auto mode. FanBot starts replying immediately. Check in whenever you like — it never stops working.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── QUOTE ── -->
+<div style="padding:80px 24px;">
+  <div style="max-width:720px;margin:0 auto;text-align:center;">
+    <div style="font-size:44px;margin-bottom:18px;">💬</div>
+    <blockquote style="font-size:clamp(17px,2.5vw,24px);color:#ddd;font-style:italic;line-height:1.65;margin-bottom:24px;font-weight:400;">
+      "I went from spending 4 hours a day replying to fans, to maybe 20 minutes. My earnings actually went <strong style="color:#00c853;">up</strong> because fans get faster replies and feel more looked after. Honestly it's insane."
+    </blockquote>
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px;">
+      <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#00c853);"></div>
+      <div style="text-align:left;">
+        <div style="color:#fff;font-size:14px;font-weight:600;">Luna 🌙</div>
+        <div style="color:#555;font-size:12px;">Fanvue creator — 1,200+ subscribers</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PRICING ── -->
+<div id="pricing" style="background:#090909;padding:80px 24px;border-top:1px solid #141414;">
+  <div style="max-width:520px;margin:0 auto;text-align:center;">
+    <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,200,83,0.08);border:1px solid rgba(0,200,83,0.2);color:#00c853;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:18px;letter-spacing:0.05em;">💳 Pricing</div>
+    <h2 style="font-size:clamp(26px,4vw,48px);font-weight:800;letter-spacing:-0.02em;margin-bottom:12px;">Simple, honest pricing</h2>
+    <p style="color:#666;font-size:16px;margin-bottom:40px;">Try it free. Pay only when you're hooked.</p>
+    <div class="glow-anim" style="background:#0d0d0d;border:2px solid #00c853;border-radius:20px;padding:40px 36px;">
+      <div style="display:inline-block;background:#00c853;color:#000;font-size:10px;font-weight:800;padding:4px 12px;border-radius:20px;margin-bottom:20px;letter-spacing:0.08em;">MOST POPULAR</div>
+      <div style="color:#fff;font-size:21px;font-weight:700;margin-bottom:6px;">FanBot Pro</div>
+      <div style="margin-bottom:4px;"><span style="font-size:52px;font-weight:900;">$29</span><span style="color:#555;font-size:16px;">/month</span></div>
+      <div style="color:#00c853;font-size:13px;font-weight:600;margin-bottom:28px;">✦ Start with 7 days completely free</div>
+      <ul style="list-style:none;padding:0;margin:0 0 32px;text-align:left;">
+        <li style="color:#ccc;font-size:14px;margin-bottom:9px;display:flex;align-items:center;gap:10px;"><span style="color:#00c853;font-weight:700;">✓</span> Unlimited AI replies — no caps</li>
+        <li style="color:#ccc;font-size:14px;margin-bottom:9px;display:flex;align-items:center;gap:10px;"><span style="color:#00c853;font-weight:700;">✓</span> Full Auto mode (24/7)</li>
+        <li style="color:#ccc;font-size:14px;margin-bottom:9px;display:flex;align-items:center;gap:10px;"><span style="color:#00c853;font-weight:700;">✓</span> Subscriber memory for every fan</li>
+        <li style="color:#ccc;font-size:14px;margin-bottom:9px;display:flex;align-items:center;gap:10px;"><span style="color:#00c853;font-weight:700;">✓</span> Smart PPV upsell suggestions</li>
+        <li style="color:#ccc;font-size:14px;margin-bottom:9px;display:flex;align-items:center;gap:10px;"><span style="color:#00c853;font-weight:700;">✓</span> Media vault integration</li>
+        <li style="color:#ccc;font-size:14px;margin-bottom:9px;display:flex;align-items:center;gap:10px;"><span style="color:#00c853;font-weight:700;">✓</span> Analytics dashboard</li>
+        <li style="color:#ccc;font-size:14px;margin-bottom:9px;display:flex;align-items:center;gap:10px;"><span style="color:#00c853;font-weight:700;">✓</span> Creator persona builder</li>
+        <li style="color:#ccc;font-size:14px;margin-bottom:9px;display:flex;align-items:center;gap:10px;"><span style="color:#00c853;font-weight:700;">✓</span> 4 reply modes + chat control</li>
+        <li style="color:#ccc;font-size:14px;margin-bottom:9px;display:flex;align-items:center;gap:10px;"><span style="color:#00c853;font-weight:700;">✓</span> Priority support</li>
+      </ul>
+      <a href="/login" class="cta" style="display:block;background:#00c853;color:#000;font-weight:800;font-size:16px;padding:16px;border-radius:10px;text-align:center;box-shadow:0 4px 20px rgba(0,200,83,0.3);">Start Free Trial → Login with Fanvue</a>
+      <p style="color:#444;font-size:12px;margin-top:12px;">No credit card required for your free trial. Cancel any time.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── FAQ ── -->
+<div style="padding:80px 24px;">
+  <div style="max-width:680px;margin:0 auto;">
+    <div style="text-align:center;margin-bottom:46px;">
+      <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,200,83,0.08);border:1px solid rgba(0,200,83,0.2);color:#00c853;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:18px;letter-spacing:0.05em;">❓ FAQ</div>
+      <h2 style="font-size:clamp(24px,4vw,44px);font-weight:800;letter-spacing:-0.02em;">Questions? We've got answers.</h2>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:4px;" id="faq-list">
+      <div class="faq-row" style="border-radius:10px;border:1px solid #161616;overflow:hidden;" onclick="toggleFaq(0)">
+        <div style="padding:17px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;"><span style="color:#fff;font-size:14px;font-weight:600;">Do I need to give you my Fanvue password?</span><span class="faq-icon" style="color:#444;font-size:20px;flex-shrink:0;transition:transform 0.2s;">+</span></div>
+        <div class="faq-answer" style="display:none;padding:0 20px 16px;color:#777;font-size:14px;line-height:1.7;">Never. We use Fanvue's official login system (OAuth), the same secure method used by other trusted apps. We only ever get access to what you approve — nothing more.</div>
+      </div>
+      <div class="faq-row" style="border-radius:10px;border:1px solid #161616;overflow:hidden;" onclick="toggleFaq(1)">
+        <div style="padding:17px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;"><span style="color:#fff;font-size:14px;font-weight:600;">Will my fans know it's AI replying?</span><span class="faq-icon" style="color:#444;font-size:20px;flex-shrink:0;transition:transform 0.2s;">+</span></div>
+        <div class="faq-answer" style="display:none;padding:0 20px 16px;color:#777;font-size:14px;line-height:1.7;">No. The AI replies in your voice, your style, your slang. To your fans, it just looks like you're super responsive. You can even review messages before they send if you want full control.</div>
+      </div>
+      <div class="faq-row" style="border-radius:10px;border:1px solid #161616;overflow:hidden;" onclick="toggleFaq(2)">
+        <div style="padding:17px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;"><span style="color:#fff;font-size:14px;font-weight:600;">What if the AI says something I don't want?</span><span class="faq-icon" style="color:#444;font-size:20px;flex-shrink:0;transition:transform 0.2s;">+</span></div>
+        <div class="faq-answer" style="display:none;padding:0 20px 16px;color:#777;font-size:14px;line-height:1.7;">You're always in control. Use 'Assisted' mode — the AI writes the reply and you approve before it sends. Or use Full Auto and let it run. Your choice.</div>
+      </div>
+      <div class="faq-row" style="border-radius:10px;border:1px solid #161616;overflow:hidden;" onclick="toggleFaq(3)">
+        <div style="padding:17px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;"><span style="color:#fff;font-size:14px;font-weight:600;">How long does setup take?</span><span class="faq-icon" style="color:#444;font-size:20px;flex-shrink:0;transition:transform 0.2s;">+</span></div>
+        <div class="faq-answer" style="display:none;padding:0 20px 16px;color:#777;font-size:14px;line-height:1.7;">About 5 minutes. Connect your Fanvue account, tell the AI how you talk and who you are, and turn it on. Most creators are up and running the same day.</div>
+      </div>
+      <div class="faq-row" style="border-radius:10px;border:1px solid #161616;overflow:hidden;" onclick="toggleFaq(4)">
+        <div style="padding:17px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;"><span style="color:#fff;font-size:14px;font-weight:600;">Can I cancel the subscription anytime?</span><span class="faq-icon" style="color:#444;font-size:20px;flex-shrink:0;transition:transform 0.2s;">+</span></div>
+        <div class="faq-answer" style="display:none;padding:0 20px 16px;color:#777;font-size:14px;line-height:1.7;">Yes, cancel any time with one click. No contracts, no questions asked. If you cancel, you keep access until the end of your billing period.</div>
+      </div>
+      <div class="faq-row" style="border-radius:10px;border:1px solid #161616;overflow:hidden;" onclick="toggleFaq(5)">
+        <div style="padding:17px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;"><span style="color:#fff;font-size:14px;font-weight:600;">What if I manage multiple Fanvue accounts?</span><span class="faq-icon" style="color:#444;font-size:20px;flex-shrink:0;transition:transform 0.2s;">+</span></div>
+        <div class="faq-answer" style="display:none;padding:0 20px 16px;color:#777;font-size:14px;line-height:1.7;">Each account gets its own FanBot subscription with separate AI settings, personas, and memory for each subscriber. Perfect for agencies running multiple creators.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── FINAL CTA ── -->
+<div style="padding:80px 24px;background:linear-gradient(180deg,#080808 0%,#0c180c 100%);border-top:1px solid #141414;text-align:center;">
+  <div style="max-width:680px;margin:0 auto;">
+    <div style="font-size:46px;margin-bottom:18px;">🚀</div>
+    <h2 style="font-size:clamp(28px,5vw,56px);font-weight:900;letter-spacing:-0.03em;margin-bottom:16px;">Ready to let AI do <br /><span class="grad">the heavy lifting?</span></h2>
+    <p style="color:#777;font-size:17px;max-width:500px;margin:0 auto 40px;line-height:1.6;">Join Fanvue creators who are earning more and working less. Your 7-day free trial starts the moment you log in.</p>
+    <a href="/login" class="cta" style="display:inline-block;background:#00c853;color:#000;font-weight:800;font-size:18px;padding:18px 44px;border-radius:12px;box-shadow:0 6px 30px rgba(0,200,83,0.4);">Login with Fanvue — It's Free →</a>
+    <p style="color:#333;font-size:13px;margin-top:14px;">No credit card required · Cancel any time · 7-day free trial</p>
+  </div>
+</div>
+
+<!-- ── FOOTER ── -->
+<div style="border-top:1px solid #111;padding:28px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;max-width:1100px;margin:0 auto;">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div style="width:26px;height:26px;border-radius:6px;background:linear-gradient(135deg,#00c853,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:13px;">🤖</div>
+    <span style="font-weight:800;">FanBot</span>
+    <span style="color:#333;font-size:13px;">© 2026</span>
+  </div>
+  <div style="display:flex;gap:22px;">
+    <a href="#features" style="color:#444;font-size:13px;">Features</a>
+    <a href="#pricing" style="color:#444;font-size:13px;">Pricing</a>
+    <a href="#" style="color:#444;font-size:13px;">Privacy</a>
+    <a href="#" style="color:#444;font-size:13px;">Terms</a>
+  </div>
+</div>
+
+<script>
+  var openFaqIndex = null;
+  function toggleFaq(i) {
+    var rows = document.querySelectorAll('.faq-row');
+    var row = rows[i];
+    var answer = row.querySelector('.faq-answer');
+    var icon = row.querySelector('.faq-icon');
+    if (openFaqIndex === i) {
+      answer.style.display = 'none';
+      icon.style.transform = 'none';
+      openFaqIndex = null;
+    } else {
+      if (openFaqIndex !== null) {
+        var prevRow = rows[openFaqIndex];
+        prevRow.querySelector('.faq-answer').style.display = 'none';
+        prevRow.querySelector('.faq-icon').style.transform = 'none';
+      }
+      answer.style.display = 'block';
+      icon.style.transform = 'rotate(45deg)';
+      openFaqIndex = i;
+    }
+  }
+</script>
+
+</body>
+</html>

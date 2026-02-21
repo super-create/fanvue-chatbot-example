@@ -56,9 +56,15 @@ function createAuthRoutes(config) {
     HTML_TEMPLATE
   } = config;
 
-  // GET / - Home page (serve React app)
+  // GET / - Home page
   router.get('/', async (req, res) => {
-    // Serve React app immediately for fast loading
+    // Not logged in → serve static landing page instantly (no React bundle overhead)
+    if (!req.session.access_token) {
+      const landingPath = path.join(__dirname, '..', 'public', 'landing.html');
+      return res.sendFile(landingPath);
+    }
+
+    // Logged in → serve React app
     const reactIndexPath = path.join(__dirname, '..', 'client', 'dist', 'index.html');
     res.sendFile(reactIndexPath);
 
