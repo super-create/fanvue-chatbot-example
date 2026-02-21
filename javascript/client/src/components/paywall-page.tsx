@@ -38,7 +38,10 @@ export function PaywallPage({ username }: PaywallPageProps) {
       if ('authorization_url' in result) {
         window.location.href = result.authorization_url
       } else {
-        setError(result.error || 'Could not start checkout. Please try again.')
+        const msg = (result as { error?: string; details?: string }).details
+          ? `${result.error}: ${(result as { details?: string }).details}`
+          : result.error || 'Could not start checkout. Please try again.'
+        setError(msg)
         setLoading(false)
       }
     } catch {
@@ -48,8 +51,8 @@ export function PaywallPage({ username }: PaywallPageProps) {
   }
 
   return (
-    <div className="flex h-screen w-full bg-[#121212] overflow-y-auto">
-      <div className="m-auto w-full max-w-md px-6 py-12">
+    <div style={{ display: 'flex', minHeight: '100vh', width: '100%', backgroundColor: '#121212', overflowY: 'auto' }}>
+      <div style={{ margin: 'auto', width: '100%', maxWidth: '448px', padding: '48px 24px' }}>
 
         {/* Payment success state */}
         {paymentStatus === 'success' && (
