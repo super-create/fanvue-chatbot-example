@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 // ─── Mock Screenshot Components ──────────────────────────────────────────────
 
@@ -251,6 +251,26 @@ function BulkMsgMockup() {
 
 export function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+
+  // The main app sets overflow:hidden + height:100% on body/#root for its
+  // panel layout. Override those here so the landing page can scroll freely.
+  useEffect(() => {
+    const body = document.body
+    const root = document.getElementById('root')
+    const prevBodyOverflow = body.style.overflow
+    const prevBodyHeight = body.style.height
+    const prevRootHeight = root ? root.style.height : ''
+
+    body.style.overflow = 'auto'
+    body.style.height = 'auto'
+    if (root) root.style.height = 'auto'
+
+    return () => {
+      body.style.overflow = prevBodyOverflow
+      body.style.height = prevBodyHeight
+      if (root) root.style.height = prevRootHeight
+    }
+  }, [])
 
   const faqs = [
     {
