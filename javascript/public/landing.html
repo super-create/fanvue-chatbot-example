@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FanBot — AI Chatbot for Fanvue Creators</title>
-  <meta name="description" content="FanBot connects to your Fanvue account and replies to your fans in your exact voice — 24/7. No missed messages. No burnout. Just more conversions and more money." />
+  <title>Fanvue Chatbot — AI Chatbot for Fanvue Creators</title>
+  <meta name="description" content="Fanvue Chatbot connects to your Fanvue account and replies to your fans in your exact voice — 24/7. No missed messages. No burnout. Just more conversions and more money." />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
@@ -43,17 +43,27 @@
 <!-- ── NAVBAR ── -->
 <nav style="position:sticky;top:0;z-index:100;background:rgba(8,8,8,0.9);backdrop-filter:blur(12px);border-bottom:1px solid #161616;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;">
   <div style="display:flex;align-items:center;gap:10px;">
-    <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#00c853,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:16px;">🤖</div>
-    <span style="font-size:18px;font-weight:800;letter-spacing:-0.02em;">FanBot</span>
+    <!-- Stylised F logo -->
+    <div style="width:34px;height:34px;border-radius:9px;background:#000;border:1.5px solid #00c853;display:flex;align-items:center;justify-content:center;box-shadow:0 0 14px rgba(0,200,83,0.28);">
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 1H18V5H6V8H14V12H6V19H2V1Z" fill="#00c853"/>
+      </svg>
+    </div>
+    <span style="font-size:18px;font-weight:800;letter-spacing:-0.02em;">Fanvue Chatbot</span>
   </div>
-  <div class="nav-links" style="display:flex;align-items:center;gap:24px;">
+  <div class="nav-links" style="display:flex;align-items:center;gap:20px;">
     <a href="#features" style="color:#777;font-size:14px;">Features</a>
     <a href="#how-it-works" style="color:#777;font-size:14px;">How It Works</a>
     <a href="#pricing" style="color:#777;font-size:14px;">Pricing</a>
-    <a href="https://blog.fanvuechatbot.com" style="color:#777;font-size:14px;">Blog</a>
-    <a href="https://discord.gg/keePKxym" target="_blank" style="color:#777;font-size:14px;display:flex;align-items:center;gap:5px;">
+    <a href="https://blog.fanvuechatbot.com" target="_blank" style="color:#777;font-size:14px;">Blog</a>
+    <a href="https://discord.gg/keePKxym" target="_blank" title="Discord" style="color:#777;display:flex;align-items:center;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
-      Discord
+    </a>
+    <a href="https://x.com/fanvuechatbot" target="_blank" title="X / Twitter" style="color:#777;display:flex;align-items:center;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.259 5.622 5.905-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+    </a>
+    <a href="YOUR_TELEGRAM_LINK" target="_blank" title="Telegram" style="color:#777;display:flex;align-items:center;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
     </a>
     <a href="/login" class="cta" style="background:#00c853;color:#000;font-weight:700;font-size:13px;padding:8px 18px;border-radius:8px;box-shadow:0 4px 16px rgba(0,200,83,0.25);">Get Started Free →</a>
   </div>
@@ -66,7 +76,7 @@
     Stop Typing.<br /><span class="grad">Start Earning.</span>
   </h1>
   <p style="color:#999;font-size:clamp(16px,2vw,20px);max-width:600px;margin:0 auto 36px;line-height:1.65;">
-    FanBot connects to your Fanvue account and replies to your fans in your exact voice — 24/7. No missed messages. No burnout. Just more conversions and more money.
+    Fanvue Chatbot connects to your Fanvue account and replies to your fans in your exact voice — 24/7. No missed messages. No burnout. Just more conversions and more money.
   </p>
   <div class="hero-btns" style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
     <a href="/login" class="cta" style="background:#00c853;color:#000;font-weight:800;font-size:16px;padding:14px 32px;border-radius:10px;box-shadow:0 4px 24px rgba(0,200,83,0.35);">Start Free Trial → Login with Fanvue</a>
@@ -80,7 +90,7 @@
         <div style="width:9px;height:9px;border-radius:50%;background:#ff5f57;"></div>
         <div style="width:9px;height:9px;border-radius:50%;background:#febc2e;"></div>
         <div style="width:9px;height:9px;border-radius:50%;background:#28c840;"></div>
-        <span style="margin-left:8px;color:#444;font-size:11px;">FanBot — Julie R.</span>
+        <span style="margin-left:8px;color:#444;font-size:11px;">Fanvue Chatbot — Julie R.</span>
       </div>
       <div style="display:flex;height:380px;">
         <!-- Sidebar icons -->
@@ -178,9 +188,9 @@
 <!-- ── SOLUTION ── -->
 <div style="padding:60px 24px;text-align:center;background:linear-gradient(180deg,#080808 0%,#0c180c 100%);">
   <div style="max-width:680px;margin:0 auto;">
-    <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,200,83,0.08);border:1px solid rgba(0,200,83,0.2);color:#00c853;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:18px;letter-spacing:0.05em;">🤖 &nbsp;Meet FanBot</div>
+    <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,200,83,0.08);border:1px solid rgba(0,200,83,0.2);color:#00c853;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:18px;letter-spacing:0.05em;">🤖 &nbsp;Meet Fanvue Chatbot</div>
     <h2 style="font-size:clamp(26px,4vw,52px);font-weight:800;letter-spacing:-0.02em;margin-bottom:18px;">Your AI that works <span class="grad">while you don't.</span></h2>
-    <p style="color:#999;font-size:17px;line-height:1.7;">FanBot plugs into your Fanvue account and handles your chats for you. It learns exactly how you talk, remembers every fan's name and preferences, and replies in a way that feels 100% human. Your fans stay happy. Your income keeps growing. You get your life back.</p>
+    <p style="color:#999;font-size:17px;line-height:1.7;">Fanvue Chatbot plugs into your Fanvue account and handles your chats for you. It learns exactly how you talk, remembers every fan's name and preferences, and replies in a way that feels 100% human. Your fans stay happy. Your income keeps growing. You get your life back.</p>
   </div>
 </div>
 
@@ -196,7 +206,7 @@
     <div style="flex:1;min-width:280px;">
       <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,200,83,0.08);border:1px solid rgba(0,200,83,0.2);color:#00c853;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:18px;letter-spacing:0.05em;">💬 AI Chat</div>
       <h3 style="font-size:clamp(22px,3vw,36px);font-weight:800;margin-bottom:14px;line-height:1.15;letter-spacing:-0.02em;">AI that replies exactly like you</h3>
-      <p style="color:#999;font-size:15px;line-height:1.7;margin-bottom:18px;">Tell FanBot how you talk — your slang, your emojis, your vibe. It learns your style and replies to fans as if it's you. Fans can't tell the difference. They just think you're incredibly responsive.</p>
+      <p style="color:#999;font-size:15px;line-height:1.7;margin-bottom:18px;">Tell Fanvue Chatbot how you talk — your slang, your emojis, your vibe. It learns your style and replies to fans as if it's you. Fans can't tell the difference. They just think you're incredibly responsive.</p>
       <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#00c853;font-weight:700;">✓</span> Learns your tone, language, and personality</div>
       <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#00c853;font-weight:700;">✓</span> Uses your catchphrases and emoji style</div>
       <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#00c853;font-weight:700;">✓</span> Handles flirting, PPV pushes, and casual chat</div>
@@ -205,7 +215,7 @@
     <div style="flex:1;min-width:300px;display:flex;justify-content:center;">
       <!-- ChatAppMockup (compact) -->
       <div style="background:#111;border:1px solid #222;border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.7);width:100%;max-width:760px;">
-        <div style="background:#1a1a1a;padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid #222;"><div style="width:9px;height:9px;border-radius:50%;background:#ff5f57;"></div><div style="width:9px;height:9px;border-radius:50%;background:#febc2e;"></div><div style="width:9px;height:9px;border-radius:50%;background:#28c840;"></div><span style="margin-left:8px;color:#444;font-size:11px;">FanBot — Julie R.</span></div>
+        <div style="background:#1a1a1a;padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid #222;"><div style="width:9px;height:9px;border-radius:50%;background:#ff5f57;"></div><div style="width:9px;height:9px;border-radius:50%;background:#febc2e;"></div><div style="width:9px;height:9px;border-radius:50%;background:#28c840;"></div><span style="margin-left:8px;color:#444;font-size:11px;">Fanvue Chatbot — Julie R.</span></div>
         <div style="display:flex;height:280px;">
           <div style="width:46px;background:#141414;border-right:1px solid #1e1e1e;display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:6px;"><div style="width:28px;height:28px;border-radius:50%;background:#00c853;display:flex;align-items:center;justify-content:center;margin-bottom:8px;"><span style="color:#000;font-size:11px;font-weight:700;">J</span></div><div style="width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:#1e2e1e;font-size:14px;">💬</div><div style="width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;">🤖</div><div style="width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;">⚙️</div></div>
           <div style="width:150px;border-right:1px solid #1e1e1e;display:flex;flex-direction:column;"><div style="padding:9px 10px;background:#1a2a1a;border-bottom:1px solid #141414;"><div style="display:flex;justify-content:space-between;"><span style="color:#ddd;font-size:12px;font-weight:600;">alex_wl</span><span style="color:#555;font-size:10px;">1m</span></div><div style="color:#666;font-size:11px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">I love your last pic 😍</div></div><div style="padding:9px 10px;border-bottom:1px solid #141414;"><div style="display:flex;justify-content:space-between;"><span style="color:#ddd;font-size:12px;">TopFan_Mike</span><span style="color:#555;font-size:10px;">4m</span></div><div style="color:#666;font-size:11px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">wanna see something? 🔥</div></div></div>
@@ -220,11 +230,11 @@
     <div style="flex:1;min-width:280px;display:flex;justify-content:center;">
       <!-- AIModesMockup -->
       <div style="background:#111;border:1px solid #222;border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.7);width:100%;max-width:480px;">
-        <div style="background:#1a1a1a;padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid #222;"><div style="width:9px;height:9px;border-radius:50%;background:#ff5f57;"></div><div style="width:9px;height:9px;border-radius:50%;background:#febc2e;"></div><div style="width:9px;height:9px;border-radius:50%;background:#28c840;"></div><span style="margin-left:8px;color:#444;font-size:11px;">FanBot — AI Settings</span></div>
+        <div style="background:#1a1a1a;padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid #222;"><div style="width:9px;height:9px;border-radius:50%;background:#ff5f57;"></div><div style="width:9px;height:9px;border-radius:50%;background:#febc2e;"></div><div style="width:9px;height:9px;border-radius:50%;background:#28c840;"></div><span style="margin-left:8px;color:#444;font-size:11px;">Fanvue Chatbot — AI Settings</span></div>
         <div style="padding:20px;">
           <div style="color:#fff;font-size:15px;font-weight:700;margin-bottom:4px;">AI Settings</div>
           <div style="color:#555;font-size:12px;margin-bottom:16px;">Choose how much control AI has over your messages</div>
-          <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;margin-bottom:8px;background:#151515;border:1px solid #222;border-radius:10px;"><div style="font-size:20px;margin-top:1px;">✍️</div><div style="flex:1;"><div style="color:#aaa;font-size:13px;font-weight:600;margin-bottom:3px;">Manual</div><div style="color:#666;font-size:11px;line-height:1.5;">You write all replies yourself. FanBot is off.</div></div></div>
+          <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;margin-bottom:8px;background:#151515;border:1px solid #222;border-radius:10px;"><div style="font-size:20px;margin-top:1px;">✍️</div><div style="flex:1;"><div style="color:#aaa;font-size:13px;font-weight:600;margin-bottom:3px;">Manual</div><div style="color:#666;font-size:11px;line-height:1.5;">You write all replies yourself. Fanvue Chatbot is off.</div></div></div>
           <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;margin-bottom:8px;background:#151515;border:1px solid #222;border-radius:10px;"><div style="font-size:20px;margin-top:1px;">👁️</div><div style="flex:1;"><div style="color:#aaa;font-size:13px;font-weight:600;margin-bottom:3px;">Assisted</div><div style="color:#666;font-size:11px;line-height:1.5;">AI suggests a reply. You review and approve before it sends.</div></div></div>
           <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;margin-bottom:8px;background:#151515;border:1px solid #222;border-radius:10px;"><div style="font-size:20px;margin-top:1px;">⚡</div><div style="flex:1;"><div style="color:#aaa;font-size:13px;font-weight:600;margin-bottom:3px;">Full Auto — Instant</div><div style="color:#666;font-size:11px;line-height:1.5;">AI replies immediately, 24/7. Fastest response time.</div></div></div>
           <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;margin-bottom:8px;background:#0d1f0d;border:1px solid #00c853;border-radius:10px;"><div style="font-size:20px;margin-top:1px;">🧠</div><div style="flex:1;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><span style="color:#fff;font-size:13px;font-weight:600;">Full Auto — Natural Delays</span><span style="background:#00c853;color:#000;font-size:9px;font-weight:700;padding:1px 7px;border-radius:10px;">ACTIVE ✓</span></div><div style="color:#666;font-size:11px;line-height:1.5;">AI replies with human-like timing. Feels 100% real to fans.</div></div></div>
@@ -238,7 +248,7 @@
     <div style="flex:1;min-width:280px;">
       <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);color:#a78bfa;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:18px;letter-spacing:0.05em;">🧠 AI Modes</div>
       <h3 style="font-size:clamp(22px,3vw,36px);font-weight:800;margin-bottom:14px;line-height:1.15;letter-spacing:-0.02em;">You choose how much control the AI has</h3>
-      <p style="color:#999;font-size:15px;line-height:1.7;margin-bottom:18px;">Not ready to go fully automatic? No problem. FanBot has four modes so you stay in control at every level.</p>
+      <p style="color:#999;font-size:15px;line-height:1.7;margin-bottom:18px;">Not ready to go fully automatic? No problem. Fanvue Chatbot has four modes so you stay in control at every level.</p>
       <div style="margin-bottom:10px;padding:10px 12px;background:#0e0e0e;border:1px solid #1a1a1a;border-radius:8px;"><div style="color:#fff;font-size:13px;font-weight:600;margin-bottom:3px;">Manual</div><div style="color:#666;font-size:12px;">You write every reply yourself. AI is off.</div></div>
       <div style="margin-bottom:10px;padding:10px 12px;background:#0e0e0e;border:1px solid #1a1a1a;border-radius:8px;"><div style="color:#fff;font-size:13px;font-weight:600;margin-bottom:3px;">Assisted</div><div style="color:#666;font-size:12px;">AI drafts replies. You review and approve each one before it sends.</div></div>
       <div style="margin-bottom:10px;padding:10px 12px;background:#0e0e0e;border:1px solid #1a1a1a;border-radius:8px;"><div style="color:#fff;font-size:13px;font-weight:600;margin-bottom:3px;">Full Auto — Instant</div><div style="color:#666;font-size:12px;">AI replies the second a message arrives. Fastest response time.</div></div>
@@ -251,7 +261,7 @@
     <div style="flex:1;min-width:280px;">
       <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);color:#a78bfa;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:18px;letter-spacing:0.05em;">🧠 Smart Memory</div>
       <h3 style="font-size:clamp(22px,3vw,36px);font-weight:800;margin-bottom:14px;line-height:1.15;letter-spacing:-0.02em;">Remembers every fan, every time</h3>
-      <p style="color:#999;font-size:15px;line-height:1.7;margin-bottom:18px;">FanBot builds a profile for every subscriber — what they like, what they've bought, what makes them tip. Every conversation feels personal, even when it's automated.</p>
+      <p style="color:#999;font-size:15px;line-height:1.7;margin-bottom:18px;">Fanvue Chatbot builds a profile for every subscriber — what they like, what they've bought, what makes them tip. Every conversation feels personal, even when it's automated.</p>
       <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#a78bfa;font-weight:700;">✓</span> Remembers past conversations</div>
       <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#a78bfa;font-weight:700;">✓</span> Tracks what each fan has purchased</div>
       <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#a78bfa;font-weight:700;">✓</span> Knows who's most likely to buy PPV</div>
@@ -260,7 +270,7 @@
     <div style="flex:1;min-width:280px;display:flex;justify-content:center;">
       <!-- SubscriberMockup -->
       <div style="background:#111;border:1px solid #222;border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.7);width:100%;max-width:340px;">
-        <div style="background:#1a1a1a;padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid #222;"><div style="width:9px;height:9px;border-radius:50%;background:#ff5f57;"></div><div style="width:9px;height:9px;border-radius:50%;background:#febc2e;"></div><div style="width:9px;height:9px;border-radius:50%;background:#28c840;"></div><span style="margin-left:8px;color:#444;font-size:11px;">FanBot — Subscriber Panel</span></div>
+        <div style="background:#1a1a1a;padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid #222;"><div style="width:9px;height:9px;border-radius:50%;background:#ff5f57;"></div><div style="width:9px;height:9px;border-radius:50%;background:#febc2e;"></div><div style="width:9px;height:9px;border-radius:50%;background:#28c840;"></div><span style="margin-left:8px;color:#444;font-size:11px;">Fanvue Chatbot — Subscriber Panel</span></div>
         <div style="padding:16px;">
           <div style="display:flex;gap:8px;margin-bottom:14px;"><div style="flex:1;background:#00c853;color:#000;font-size:12px;font-weight:700;padding:8px;border-radius:8px;text-align:center;">🧠 Memory</div><div style="flex:1;background:#1e1e1e;color:#888;font-size:12px;padding:8px;border-radius:8px;text-align:center;">⚡ Quick Profile</div></div>
           <div style="background:#0d1a0d;border:1px solid #00c853;border-radius:8px;padding:12px;margin-bottom:12px;">
@@ -280,7 +290,7 @@
     <div style="flex:1;min-width:280px;display:flex;justify-content:center;">
       <!-- PersonaMockup -->
       <div style="background:#111;border:1px solid #222;border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.7);width:100%;max-width:340px;">
-        <div style="background:#1a1a1a;padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid #222;"><div style="width:9px;height:9px;border-radius:50%;background:#ff5f57;"></div><div style="width:9px;height:9px;border-radius:50%;background:#febc2e;"></div><div style="width:9px;height:9px;border-radius:50%;background:#28c840;"></div><span style="margin-left:8px;color:#444;font-size:11px;">FanBot — Creator Persona</span></div>
+        <div style="background:#1a1a1a;padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid #222;"><div style="width:9px;height:9px;border-radius:50%;background:#ff5f57;"></div><div style="width:9px;height:9px;border-radius:50%;background:#febc2e;"></div><div style="width:9px;height:9px;border-radius:50%;background:#28c840;"></div><span style="margin-left:8px;color:#444;font-size:11px;">Fanvue Chatbot — Creator Persona</span></div>
         <div style="padding:16px;">
           <div style="color:#fff;font-size:15px;font-weight:700;margin-bottom:4px;">Creator Persona</div>
           <div style="color:#555;font-size:11px;margin-bottom:14px;">AI Identity — who the AI acts as</div>
@@ -297,7 +307,7 @@
     <div style="flex:1;min-width:280px;">
       <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);color:#f59e0b;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:18px;letter-spacing:0.05em;">🎭 Creator Persona</div>
       <h3 style="font-size:clamp(22px,3vw,36px);font-weight:800;margin-bottom:14px;line-height:1.15;letter-spacing:-0.02em;">Build your AI twin in 5 minutes</h3>
-      <p style="color:#999;font-size:15px;line-height:1.7;margin-bottom:18px;">Tell FanBot who your character is — her name, age, personality, location, appearance, and backstory. The AI will use this to roleplay as her perfectly in every conversation.</p>
+      <p style="color:#999;font-size:15px;line-height:1.7;margin-bottom:18px;">Tell Fanvue Chatbot who your character is — her name, age, personality, location, appearance, and backstory. The AI will use this to roleplay as her perfectly in every conversation.</p>
       <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#f59e0b;font-weight:700;">✓</span> Name, age, location, accent</div>
       <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#f59e0b;font-weight:700;">✓</span> Physical description for context</div>
       <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#f59e0b;font-weight:700;">✓</span> Personality and vibe</div>
@@ -311,7 +321,7 @@
     <div style="flex:1;min-width:280px;">
       <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);color:#f87171;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:18px;letter-spacing:0.05em;">🖼️ Media Control</div>
       <h3 style="font-size:clamp(22px,3vw,36px);font-weight:800;margin-bottom:14px;line-height:1.15;letter-spacing:-0.02em;">AI knows your content and sells it for you</h3>
-      <p style="color:#999;font-size:15px;line-height:1.7;margin-bottom:18px;">Connect your Fanvue media vault and FanBot will suggest the right photos or videos at the right moment — free content to build connection, PPV content to build income.</p>
+      <p style="color:#999;font-size:15px;line-height:1.7;margin-bottom:18px;">Connect your Fanvue media vault and Fanvue Chatbot will suggest the right photos or videos at the right moment — free content to build connection, PPV content to build income.</p>
       <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#f87171;font-weight:700;">✓</span> Reads your full Fanvue media vault</div>
       <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#f87171;font-weight:700;">✓</span> Sends SFW content to build connection</div>
       <div style="color:#ccc;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span style="color:#f87171;font-weight:700;">✓</span> Suggests PPV at the perfect moment</div>
@@ -321,7 +331,7 @@
     <div style="flex:1;min-width:280px;display:flex;justify-content:center;">
       <!-- MediaMockup -->
       <div style="background:#111;border:1px solid #222;border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.7);width:100%;max-width:420px;">
-        <div style="background:#1a1a1a;padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid #222;"><div style="width:9px;height:9px;border-radius:50%;background:#ff5f57;"></div><div style="width:9px;height:9px;border-radius:50%;background:#febc2e;"></div><div style="width:9px;height:9px;border-radius:50%;background:#28c840;"></div><span style="margin-left:8px;color:#444;font-size:11px;">FanBot — Media Control</span></div>
+        <div style="background:#1a1a1a;padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid #222;"><div style="width:9px;height:9px;border-radius:50%;background:#ff5f57;"></div><div style="width:9px;height:9px;border-radius:50%;background:#febc2e;"></div><div style="width:9px;height:9px;border-radius:50%;background:#28c840;"></div><span style="margin-left:8px;color:#444;font-size:11px;">Fanvue Chatbot — Media Control</span></div>
         <div style="padding:18px;">
           <div style="color:#fff;font-size:15px;font-weight:700;margin-bottom:14px;">Media Control</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
@@ -343,7 +353,7 @@
     <div style="flex:1;min-width:280px;display:flex;justify-content:center;">
       <!-- AnalyticsMockup -->
       <div style="background:#111;border:1px solid #222;border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.7);width:100%;max-width:480px;">
-        <div style="background:#1a1a1a;padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid #222;"><div style="width:9px;height:9px;border-radius:50%;background:#ff5f57;"></div><div style="width:9px;height:9px;border-radius:50%;background:#febc2e;"></div><div style="width:9px;height:9px;border-radius:50%;background:#28c840;"></div><span style="margin-left:8px;color:#444;font-size:11px;">FanBot — Analytics Dashboard</span></div>
+        <div style="background:#1a1a1a;padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid #222;"><div style="width:9px;height:9px;border-radius:50%;background:#ff5f57;"></div><div style="width:9px;height:9px;border-radius:50%;background:#febc2e;"></div><div style="width:9px;height:9px;border-radius:50%;background:#28c840;"></div><span style="margin-left:8px;color:#444;font-size:11px;">Fanvue Chatbot — Analytics Dashboard</span></div>
         <div style="padding:18px;">
           <div style="color:#fff;font-size:15px;font-weight:700;margin-bottom:14px;">Analytics Dashboard</div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
@@ -392,13 +402,13 @@
         <div style="color:#1a1a1a;font-size:52px;font-weight:900;position:absolute;top:14px;right:18px;line-height:1;">02</div>
         <div style="font-size:34px;margin-bottom:14px;">🎭</div>
         <div style="color:#fff;font-weight:700;font-size:17px;margin-bottom:10px;">Set up your AI persona</div>
-        <div style="color:#666;font-size:13px;line-height:1.7;">Tell FanBot how you talk, your character's backstory, and what you sell. Takes 5 minutes. The AI uses this in every conversation.</div>
+        <div style="color:#666;font-size:13px;line-height:1.7;">Tell Fanvue Chatbot how you talk, your character's backstory, and what you sell. Takes 5 minutes. The AI uses this in every conversation.</div>
       </div>
       <div style="background:#111;border:1px solid #1a1a1a;border-radius:14px;padding:28px 22px;position:relative;">
         <div style="color:#1a1a1a;font-size:52px;font-weight:900;position:absolute;top:14px;right:18px;line-height:1;">03</div>
         <div style="font-size:34px;margin-bottom:14px;">✅</div>
         <div style="color:#fff;font-weight:700;font-size:17px;margin-bottom:10px;">Turn it on and relax</div>
-        <div style="color:#666;font-size:13px;line-height:1.7;">Switch to Full Auto mode. FanBot starts replying immediately. Check in whenever you like — it never stops working.</div>
+        <div style="color:#666;font-size:13px;line-height:1.7;">Switch to Full Auto mode. Fanvue Chatbot starts replying immediately. Check in whenever you like — it never stops working.</div>
       </div>
     </div>
   </div>
@@ -429,7 +439,7 @@
     <p style="color:#666;font-size:16px;margin-bottom:40px;">Try it free. Pay only when you're hooked.</p>
     <div class="glow-anim" style="background:#0d0d0d;border:2px solid #00c853;border-radius:20px;padding:40px 36px;">
       <div style="display:inline-block;background:#00c853;color:#000;font-size:10px;font-weight:800;padding:4px 12px;border-radius:20px;margin-bottom:20px;letter-spacing:0.08em;">MOST POPULAR</div>
-      <div style="color:#fff;font-size:21px;font-weight:700;margin-bottom:6px;">FanBot Pro</div>
+      <div style="color:#fff;font-size:21px;font-weight:700;margin-bottom:6px;">Fanvue Chatbot Pro</div>
       <div style="margin-bottom:4px;"><span style="font-size:52px;font-weight:900;">$29</span><span style="color:#555;font-size:16px;">/month</span></div>
       <div style="color:#00c853;font-size:13px;font-weight:600;margin-bottom:28px;">✦ Start with 7 days completely free</div>
       <ul style="list-style:none;padding:0;margin:0 0 32px;text-align:left;">
@@ -505,7 +515,7 @@
       </div>
       <div class="faq-row" style="border-radius:10px;border:1px solid #161616;overflow:hidden;" onclick="toggleFaq(5)">
         <div style="padding:17px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;"><span style="color:#fff;font-size:14px;font-weight:600;">What if I manage multiple Fanvue accounts?</span><span class="faq-icon" style="color:#444;font-size:20px;flex-shrink:0;transition:transform 0.2s;">+</span></div>
-        <div class="faq-answer" style="display:none;padding:0 20px 16px;color:#777;font-size:14px;line-height:1.7;">Each account gets its own FanBot subscription with separate AI settings, personas, and memory for each subscriber. Perfect for agencies running multiple creators.</div>
+        <div class="faq-answer" style="display:none;padding:0 20px 16px;color:#777;font-size:14px;line-height:1.7;">Each account gets its own Fanvue Chatbot subscription with separate AI settings, personas, and memory for each subscriber. Perfect for agencies running multiple creators.</div>
       </div>
     </div>
   </div>
@@ -526,16 +536,24 @@
 <div style="border-top:1px solid #111;padding:28px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;max-width:1100px;margin:0 auto;">
   <div style="display:flex;align-items:center;gap:10px;">
     <div style="width:26px;height:26px;border-radius:6px;background:linear-gradient(135deg,#00c853,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:13px;">🤖</div>
-    <span style="font-weight:800;">FanBot</span>
+    <span style="font-weight:800;">Fanvue Chatbot</span>
     <span style="color:#333;font-size:13px;">© 2026</span>
   </div>
-  <div style="display:flex;gap:22px;flex-wrap:wrap;">
+  <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center;">
     <a href="#features" style="color:#444;font-size:13px;">Features</a>
     <a href="#pricing" style="color:#444;font-size:13px;">Pricing</a>
     <a href="https://blog.fanvuechatbot.com" target="_blank" style="color:#444;font-size:13px;">Blog</a>
-    <a href="https://discord.gg/keePKxym" target="_blank" style="color:#444;font-size:13px;">Discord</a>
     <a href="#" style="color:#444;font-size:13px;">Privacy</a>
     <a href="#" style="color:#444;font-size:13px;">Terms</a>
+    <a href="https://discord.gg/keePKxym" target="_blank" title="Discord" style="color:#444;display:flex;align-items:center;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+    </a>
+    <a href="https://x.com/fanvuechatbot" target="_blank" title="X / Twitter" style="color:#444;display:flex;align-items:center;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.259 5.622 5.905-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+    </a>
+    <a href="YOUR_TELEGRAM_LINK" target="_blank" title="Telegram" style="color:#444;display:flex;align-items:center;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+    </a>
   </div>
 </div>
 
