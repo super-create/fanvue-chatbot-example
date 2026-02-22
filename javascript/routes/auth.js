@@ -126,7 +126,10 @@ function createAuthRoutes(config) {
     });
 
     const authUrl = `${OAUTH_AUTH_URL}?${params.toString()}`;
-    res.redirect(authUrl);
+    req.session.save((err) => {
+      if (err) console.error('[Auth] Session save error before redirect:', err.message);
+      res.redirect(authUrl);
+    });
   });
 
   // GET /callback - OAuth callback handler
