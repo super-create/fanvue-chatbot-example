@@ -69,30 +69,8 @@ app.post('/webhook/paystack', express.raw({ type: 'application/json' }), paystac
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Session store: PostgreSQL via Supabase (survives Railway restarts/redeploys)
-const pgSession = require('connect-pg-simple')(session);
-const { Pool } = require('pg');
-
-const pgPool = new Pool({
-  connectionString: process.env.SUPABASE_CONNECTION_STRING,
-  ssl: { rejectUnauthorized: false },
-  max: 5,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000
-});
-
-// Log pool errors so they don't crash the process
-pgPool.on('error', (err) => {
-  console.error('[Session] PG pool error:', err.message);
-});
-
+// Session store: use PostgreSQL if SUPABASE_CONNECTION_STRING is set, else in-memory
 const sessionConfig = {
-  store: new pgSession({
-    pool: pgPool,
-    tableName: 'session',
-    createTableIfMissing: true,
-    errorLog: (err) => console.error('[Session] Store error:', err.message)
-  }),
   secret: process.env.SESSION_SECRET || 'dev-secret-change-in-production',
   resave: false,
   saveUninitialized: false,
@@ -103,7 +81,31 @@ const sessionConfig = {
   }
 };
 
-console.log('[Session] Using PostgreSQL session store (Supabase)');
+if (process.env.SUPABASE_CONNECTION_STRING) {
+  try {
+    const pgSession = require('connect-pg-simple')(session);
+    const { Pool } = require('pg');
+    const pgPool = new Pool({
+      connectionString: process.env.SUPABASE_CONNECTION_STRING,
+      ssl: { rejectUnauthorized: false },
+      max: 5,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 5000
+    });
+    pgPool.on('error', (err) => console.error('[Session] PG pool error:', err.message));
+    sessionConfig.store = new pgSession({
+      pool: pgPool,
+      tableName: 'session',
+      createTableIfMissing: true,
+      errorLog: (err) => console.error('[Session] Store error:', err.message)
+    });
+    console.log('[Session] Using PostgreSQL session store (Supabase)');
+  } catch (err) {
+    console.error('[Session] PG store init failed, falling back to memory:', err.message);
+  }
+} else {
+  console.log('[Session] SUPABASE_CONNECTION_STRING not set — using in-memory session store');
+}
 
 app.use(session(sessionConfig));
 
