@@ -75,14 +75,23 @@ const { Pool } = require('pg');
 
 const pgPool = new Pool({
   connectionString: process.env.SUPABASE_CONNECTION_STRING,
-  ssl: { rejectUnauthorized: false }
+  ssl: { rejectUnauthorized: false },
+  max: 5,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 5000
+});
+
+// Log pool errors so they don't crash the process
+pgPool.on('error', (err) => {
+  console.error('[Session] PG pool error:', err.message);
 });
 
 const sessionConfig = {
   store: new pgSession({
     pool: pgPool,
     tableName: 'session',
-    createTableIfMissing: true
+    createTableIfMissing: true,
+    errorLog: (err) => console.error('[Session] Store error:', err.message)
   }),
   secret: process.env.SESSION_SECRET || 'dev-secret-change-in-production',
   resave: false,
