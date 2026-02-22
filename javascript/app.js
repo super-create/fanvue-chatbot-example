@@ -83,7 +83,7 @@ const sessionConfig = {
 
 if (process.env.SUPABASE_CONNECTION_STRING) {
   try {
-    const pgSession = require('connect-pg-simple')(session);
+    const PgSessionStore = require('connect-pg-simple')(session);
     const { Pool } = require('pg');
     const pgPool = new Pool({
       connectionString: process.env.SUPABASE_CONNECTION_STRING,
@@ -93,12 +93,32 @@ if (process.env.SUPABASE_CONNECTION_STRING) {
       connectionTimeoutMillis: 5000
     });
     pgPool.on('error', (err) => console.error('[Session] PG pool error:', err.message));
-    sessionConfig.store = new pgSession({
+
+    const pgStore = new PgSessionStore({
       pool: pgPool,
       tableName: 'session',
       createTableIfMissing: true,
       errorLog: (err) => console.error('[Session] Store error:', err.message)
     });
+
+    // Wrap store so PG errors never propagate to next(err) — fall back to empty session
+    const origGet = pgStore.get.bind(pgStore);
+    pgStore.get = (sid, cb) => origGet(sid, (err, session) => {
+      if (err) { console.error('[Session] Store get error, using empty session:', err.message); return cb(null, null); }
+      cb(null, session);
+    });
+    const origSet = pgStore.set.bind(pgStore);
+    pgStore.set = (sid, sess, cb) => origSet(sid, sess, (err) => {
+      if (err) console.error('[Session] Store set error:', err.message);
+      if (cb) cb();
+    });
+    const origDestroy = pgStore.destroy.bind(pgStore);
+    pgStore.destroy = (sid, cb) => origDestroy(sid, (err) => {
+      if (err) console.error('[Session] Store destroy error:', err.message);
+      if (cb) cb();
+    });
+
+    sessionConfig.store = pgStore;
     console.log('[Session] Using PostgreSQL session store (Supabase)');
   } catch (err) {
     console.error('[Session] PG store init failed, falling back to memory:', err.message);
