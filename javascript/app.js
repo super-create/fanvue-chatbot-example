@@ -69,8 +69,21 @@ app.post('/webhook/paystack', express.raw({ type: 'application/json' }), paystac
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Session store: use PostgreSQL via Supabase if connection string is available
+// Session store: PostgreSQL via Supabase (survives Railway restarts/redeploys)
+const pgSession = require('connect-pg-simple')(session);
+const { Pool } = require('pg');
+
+const pgPool = new Pool({
+  connectionString: process.env.SUPABASE_CONNECTION_STRING,
+  ssl: { rejectUnauthorized: false }
+});
+
 const sessionConfig = {
+  store: new pgSession({
+    pool: pgPool,
+    tableName: 'session',
+    createTableIfMissing: true
+  }),
   secret: process.env.SESSION_SECRET || 'dev-secret-change-in-production',
   resave: false,
   saveUninitialized: false,
@@ -81,10 +94,7 @@ const sessionConfig = {
   }
 };
 
-// NOTE: PG session store disabled — using in-memory sessions.
-// In-memory sessions are lost on Railway restart (redeploy) but are reliable.
-// TODO: re-enable PG session store once SSL config is verified.
-console.log('[Session] Using in-memory session store');
+console.log('[Session] Using PostgreSQL session store (Supabase)');
 
 app.use(session(sessionConfig));
 
