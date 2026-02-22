@@ -10,6 +10,20 @@ const { getCreatorPersona } = require('../database/personas');
 const { upsertUser } = require('../database/users');
 const { getSubscription, isSubscriptionActive, upsertSubscription } = require('../database/subscriptions');
 
+// Loops email — fire-and-forget, never throws
+async function triggerLoopsEvent(email, eventName, extraProps = {}) {
+  const apiKey = process.env.LOOPS_API_KEY;
+  if (!apiKey) return;
+  try {
+    await axios.post('https://app.loops.so/api/v1/events/send', { email, eventName, ...extraProps }, {
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' }
+    });
+    console.log(`[Loops] Sent event "${eventName}" for ${email}`);
+  } catch (err) {
+    console.error('[Loops] Failed to send event:', err.response?.data || err.message);
+  }
+}
+
 // PKCE helpers
 function base64url(input) {
   return input
@@ -220,6 +234,10 @@ function createAuthRoutes(config) {
               trial_ends_at: trialEnd.toISOString(),
               current_period_start: new Date().toISOString(),
               current_period_end: trialEnd.toISOString()
+            });
+            // Trigger welcome drip sequence in Loops
+            triggerLoopsEvent(userEmail, 'trial_started', {
+              firstName: fanvueHandle || userEmail.split('@')[0]
             });
           }
           req.session.subscription = subscription || { status: 'none' };
