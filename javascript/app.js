@@ -148,7 +148,11 @@ app.use('/api/', (req, res, next) => {
 });
 
 // Serve static files from React build (client/dist) - new UI
-app.use(express.static(path.join(__dirname, 'client', 'dist')));
+// index:false so express.static doesn't intercept / and serve index.html directly;
+// the auth route handler checks session and decides landing.html vs React app.
+app.use(express.static(path.join(__dirname, 'client', 'dist'), { index: false }));
+// Serve public assets (landing page, etc.)
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 // Keep old public folder for backwards compatibility (CSS/JS assets)
 app.use('/legacy', express.static(path.join(__dirname, 'public')));
 
