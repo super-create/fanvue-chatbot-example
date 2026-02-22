@@ -97,7 +97,7 @@ if (process.env.SUPABASE_CONNECTION_STRING) {
     const pgStore = new PgSessionStore({
       pool: pgPool,
       tableName: 'app_sessions',
-      createTableIfMissing: true,
+      createTableIfMissing: false,
       errorLog: (err) => console.error('[Session] Store error:', err.message)
     });
 
