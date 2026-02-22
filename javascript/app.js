@@ -152,7 +152,8 @@ app.use('/api/', (req, res, next) => {
 // the auth route handler checks session and decides landing.html vs React app.
 app.use(express.static(path.join(__dirname, 'client', 'dist'), { index: false }));
 // Serve public assets (landing page, etc.)
-app.use(express.static(path.join(__dirname, 'public'), { index: false }));
+// extensions: ['html'] lets /privacy resolve to privacy.html, /terms to terms.html, etc.
+app.use(express.static(path.join(__dirname, 'public'), { index: false, extensions: ['html'] }));
 // Keep old public folder for backwards compatibility (CSS/JS assets)
 app.use('/legacy', express.static(path.join(__dirname, 'public')));
 
