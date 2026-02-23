@@ -34,9 +34,9 @@ router.post('/api/subscribe', async (req, res) => {
       },
       body: JSON.stringify({
         email,
-        amount: process.env.PAYSTACK_PLAN_AMOUNT,   // required by Paystack even when using plan
-        currency: process.env.PAYSTACK_CURRENCY || 'KES',
+        amount: process.env.PAYSTACK_PLAN_AMOUNT,  // plan overrides this, but amount is required
         plan: process.env.PAYSTACK_PLAN_CODE,
+        channels: ['card'],  // subscriptions only support card — must restrict explicitly
         callback_url: callbackUrl,
         metadata: {
           user_id: userId || null,
