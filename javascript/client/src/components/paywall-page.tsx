@@ -85,7 +85,7 @@ export function PaywallPage({ username }: PaywallPageProps) {
         <div className="rounded-2xl border border-[#333] bg-[#1e1e1e] p-6">
           <div className="mb-6 text-center">
             <div className="flex items-end justify-center gap-1">
-              <span className="text-4xl font-bold text-white">$29</span>
+              <span className="text-4xl font-bold text-white">KES 100</span>
               <span className="mb-1 text-[#888]">/month</span>
             </div>
             <p className="mt-1 text-sm text-[#00c853]">Cancel anytime</p>
@@ -117,7 +117,7 @@ export function PaywallPage({ username }: PaywallPageProps) {
               ? <><Loader2 className="h-4 w-4 animate-spin" /> Redirecting to checkout...</>
               : paymentStatus === 'success'
               ? <><Loader2 className="h-4 w-4 animate-spin" /> Activating account...</>
-              : 'Subscribe — $29/month'
+              : 'Subscribe — KES 100/month'
             }
           </button>
 
