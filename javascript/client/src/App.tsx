@@ -57,9 +57,15 @@ function App() {
     return <LandingPage />
   }
 
-  // Show paywall if logged in but no active subscription
-  const subStatus = session.subscription?.status
-  const hasActiveSubscription = subStatus === 'active' || subStatus === 'trialing'
+  // Show paywall if logged in but no active subscription.
+  // Use server-computed isActive (checks trial expiry against DB) as the source of truth.
+  // Fall back to client-side check if isActive is not present (older session).
+  const sub = session.subscription
+  const hasActiveSubscription = sub?.isActive === true ||
+    (sub?.isActive === undefined && (
+      sub?.status === 'active' ||
+      (sub?.status === 'trialing' && !!sub.trialEndsAt && new Date(sub.trialEndsAt) > new Date())
+    ))
 
   if (!hasActiveSubscription) {
     return (

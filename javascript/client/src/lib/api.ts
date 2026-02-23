@@ -45,6 +45,7 @@ export interface Message {
 export interface SubscriptionInfo {
   status: 'none' | 'trialing' | 'active' | 'cancelled' | 'expired'
   plan?: string | null
+  isActive?: boolean
   trialEndsAt?: string | null
   currentPeriodEnd?: string | null
 }

@@ -20,6 +20,7 @@ const {
   dismissContentRequest
 } = require('./database/content-requests');
 const { trackAIRequest, checkUsageLimits } = require('./database/usage');
+const { getSubscription, isSubscriptionActive } = require('./database/subscriptions');
 
 // Import service modules
 const {
@@ -1911,16 +1912,26 @@ app.post('/webhook', async (req, res) => {
 
 // GET /api/session - Check if user is logged in (for React app)
 // Uses cached session data — no external API call on every page load
-app.get('/api/session', (req, res) => {
+app.get('/api/session', async (req, res) => {
   if (!req.session.access_token) {
     return res.json({ loggedIn: false });
   }
 
   try {
-    // All data needed was cached during OAuth login — return instantly
     const rawUsername = req.session.userEmail || 'User';
     const username = rawUsername.includes('@') ? rawUsername.split('@')[0] : rawUsername;
-    const subscription = req.session.subscription || { status: 'none' };
+
+    // Always refresh subscription from DB so trial expiry and status changes are immediate
+    let subscription = req.session.subscription || { status: 'none' };
+    if (req.session.userId) {
+      const dbSub = await getSubscription(req.session.userId);
+      if (dbSub) {
+        subscription = dbSub;
+        req.session.subscription = dbSub;
+      }
+    }
+
+    const isActive = isSubscriptionActive(subscription);
 
     return res.json({
       loggedIn: true,
@@ -1930,6 +1941,7 @@ app.get('/api/session', (req, res) => {
       subscription: {
         status: subscription.status || 'none',
         plan: subscription.plan || null,
+        isActive,
         trialEndsAt: subscription.trial_ends_at || null,
         currentPeriodEnd: subscription.current_period_end || null
       }
