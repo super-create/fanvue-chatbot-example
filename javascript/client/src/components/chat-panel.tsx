@@ -88,6 +88,11 @@ export function ChatPanel({
   const lastMessageUuidRef = useRef<string | null>(null)
   const shouldScrollRef = useRef(false)
 
+  // Multi-conversation tracking
+  const [unreadConvs, setUnreadConvs] = useState<Set<string>>(new Set())
+  const lastKnownConvUpdatesRef = useRef<Map<string, string>>(new Map())
+  const silentReplyInProgressRef = useRef<Set<string>>(new Set())
+
   // Cached AI context refs
   const creatorProfileRef = useRef<CreatorPersona | null>(null)
   const systemPromptRef = useRef<string>('')
@@ -404,6 +409,53 @@ export function ChatPanel({
     hidePreview()
   }
 
+  // --- Silent background reply for non-selected conversations ---
+
+  const sendSilentAutoReply = async (convUuid: string) => {
+    if (silentReplyInProgressRef.current.has(convUuid)) return
+    silentReplyInProgressRef.current.add(convUuid)
+    try {
+      const msgs = await getMessages(convUuid)
+      const latestSub = findLatestSubscriberMessage(msgs)
+      if (!latestSub) return
+      const alreadyReplied = loadLastRepliedId(convUuid)
+      if (alreadyReplied === latestSub.uuid) return
+      saveLastRepliedId(convUuid, latestSub.uuid)
+
+      await loadAIContext()
+      const chatMedia = await getChatMedia(convUuid)
+      const delaySeconds = operationMode === 'full-auto-instant'
+        ? 2
+        : Math.floor(Math.random() * (replyDelay.max - replyDelay.min + 1)) + replyDelay.min
+
+      await new Promise(resolve => setTimeout(resolve, delaySeconds * 1000))
+
+      const result = await generateAIReply({
+        conversationHistory: buildConversationHistory(msgs),
+        systemPrompt: systemPromptRef.current,
+        userProfile: null,
+        creatorProfile: creatorProfileRef.current,
+        subscriberMemory: null,
+        conversationUuid: convUuid,
+        subscriberHandle: latestSub.sender?.handle || null,
+        chatMedia,
+      })
+
+      if (result.reply?.trim()) {
+        if (result.mediaToSend) {
+          await sendMediaMessage(convUuid, result.mediaToSend.uuid, result.reply, result.mediaToSend.price)
+        } else {
+          await sendMessage(convUuid, result.reply)
+        }
+        await trackAIMessage(convUuid)
+      }
+    } catch (err) {
+      console.error('[AI] Silent reply error for conv', convUuid, err)
+    } finally {
+      silentReplyInProgressRef.current.delete(convUuid)
+    }
+  }
+
   // --- Core AI Check (called by auto-refresh interval) ---
 
   const checkForNewMessagesAndReply = async () => {
@@ -454,7 +506,7 @@ export function ChatPanel({
     }
   }, [settingsVersion])
 
-  // Handle conversation changes
+  // Handle conversation changes — clear unread badge when switching to a conv
   useEffect(() => {
     if (selectedConversation) {
       loadMessages(selectedConversation)
@@ -464,10 +516,54 @@ export function ChatPanel({
       cancelPendingReply()
       setShowSuggestion(false)
       setShowPreview(false)
+      setUnreadConvs(prev => { const next = new Set(prev); next.delete(selectedConversation); return next })
     } else {
       setMessages([])
     }
   }, [selectedConversation])
+
+  // Multi-conversation polling — detect new messages across all conversations
+  useEffect(() => {
+    if (operationMode === 'manual') return
+
+    const interval = setInterval(async () => {
+      try {
+        const convs = await getConversations()
+        setConversations(convs)
+
+        for (const conv of convs) {
+          const key = conv.latestMessageAt || conv.latestMessageId
+          if (!key) continue
+          const known = lastKnownConvUpdatesRef.current.get(conv.uuid)
+
+          if (known === undefined) {
+            // First time seeing this conv — just record it, don't treat as new
+            lastKnownConvUpdatesRef.current.set(conv.uuid, key)
+            continue
+          }
+
+          if (key !== known) {
+            lastKnownConvUpdatesRef.current.set(conv.uuid, key)
+
+            if (conv.uuid === selectedConversation) continue // handled by main check
+
+            // New message on a different conversation
+            setUnreadConvs(prev => new Set(prev).add(conv.uuid))
+            onConversationChange(conv.uuid) // auto-switch
+
+            if (operationMode.startsWith('full-auto')) {
+              sendSilentAutoReply(conv.uuid)
+            }
+          }
+        }
+      } catch (err) {
+        console.error('[Multi-conv] Poll error:', err)
+      }
+    }, 30000)
+
+    return () => clearInterval(interval)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [operationMode, selectedConversation])
 
   // Auto-refresh with dynamic interval and AI checking
   useEffect(() => {
@@ -534,7 +630,12 @@ export function ChatPanel({
           <SelectContent>
             {conversations.map((conv) => (
               <SelectItem key={conv.uuid} value={conv.uuid}>
-                {conv.label}
+                <span className="flex items-center gap-2">
+                  {unreadConvs.has(conv.uuid) && (
+                    <span className="inline-block w-2 h-2 rounded-full bg-[#00c853] shrink-0" />
+                  )}
+                  {conv.label}
+                </span>
               </SelectItem>
             ))}
           </SelectContent>

@@ -1003,10 +1003,11 @@ async function getPPVStats(conversationUuid) {
 // - Purchases 4-5: $7
 // - ... up to max $15
 // If last PPV was NOT purchased, reset to $5
-async function calculateNextPPVPrice(conversationUuid) {
-  const BASE_PRICE = 5;  // Starting price in dollars
-  const MAX_PRICE = 15;  // Maximum PPV price cap
-  const PURCHASES_PER_TIER = 2; // Escalate price every 2 purchases
+async function calculateNextPPVPrice(conversationUuid, config = {}) {
+  const BASE_PRICE = config.basePrice !== undefined ? config.basePrice : 5;
+  const MAX_PRICE = config.priceCap !== undefined ? config.priceCap : 15;
+  const PURCHASES_PER_TIER = config.incrementAfter !== undefined ? config.incrementAfter : 2;
+  const INCREMENT = config.increment !== undefined ? config.increment : 1;
 
   try {
     // Get all PPV records for this subscriber, ordered by sent_at
@@ -1054,7 +1055,7 @@ async function calculateNextPPVPrice(conversationUuid) {
     // Tier 2 (4-5 purchases): $7
     // etc.
     const tier = Math.floor(consecutivePurchases / PURCHASES_PER_TIER);
-    const calculatedPrice = BASE_PRICE + tier;
+    const calculatedPrice = BASE_PRICE + (tier * INCREMENT);
     const newPrice = Math.min(calculatedPrice, MAX_PRICE);
 
     console.log('[PPV Price] Calculated: $' + newPrice, '| Tier:', tier, '| Consecutive purchases:', consecutivePurchases);
@@ -2195,7 +2196,9 @@ app.get('/api/conversations', async (req, res) => {
     const formatted = Array.isArray(conversations)
       ? conversations.map((chat) => ({
           uuid: chat.user?.uuid || chat.uuid,
-          label: chat.user?.username || chat.user?.handle || chat.title || chat.name || chat.uuid
+          label: chat.user?.username || chat.user?.handle || chat.title || chat.name || chat.uuid,
+          latestMessageId: chat.latestMessage?.uuid || chat.lastMessage?.uuid || null,
+          latestMessageAt: chat.latestMessage?.createdAt || chat.latestMessage?.sentAt || chat.updatedAt || chat.lastActivity || null,
         }))
       : [];
 
@@ -2677,7 +2680,12 @@ app.post('/api/ai-generate-reply', async (req, res) => {
         console.log('[AI Reply] Vault media check:', allMedia.length, 'total in vault,', sentMedia.length, 'already sent to this subscriber');
 
         // Calculate dynamic PPV pricing for this subscriber
-        currentPPVPricing = await calculateNextPPVPrice(conversationUuid);
+        currentPPVPricing = await calculateNextPPVPrice(conversationUuid, {
+          basePrice: req.session.ppvBasePrice,
+          increment: req.session.ppvIncrement,
+          incrementAfter: req.session.ppvIncrementAfter,
+          priceCap: req.session.ppvPriceCap,
+        });
         console.log('[AI Reply] PPV pricing calculated:', currentPPVPricing);
 
         // Get folder prefixes from session
@@ -3182,13 +3190,17 @@ app.get('/api/ai-settings', async (req, res) => {
 
   return res.json({
     systemPrompt: req.session.systemPrompt || DEFAULT_SYSTEM_PROMPT,
-    aiMode: req.session.aiMode || 'manual', // 'manual', 'assisted', 'full'
+    aiMode: req.session.aiMode || 'manual',
     fastResponseMode: req.session.fastResponseMode !== undefined ? req.session.fastResponseMode : true,
     maxReplyTokens: req.session.maxReplyTokens || 150,
     maxProfileTokens: req.session.maxProfileTokens || 500,
     replyTemperature: req.session.replyTemperature !== undefined ? req.session.replyTemperature : 0.9,
     aiModel: req.session.aiModel || 'gpt-4o',
-    profileModel: req.session.profileModel || 'gpt-4o'
+    profileModel: req.session.profileModel || 'gpt-4o',
+    ppvBasePrice: req.session.ppvBasePrice !== undefined ? req.session.ppvBasePrice : 5,
+    ppvIncrement: req.session.ppvIncrement !== undefined ? req.session.ppvIncrement : 1,
+    ppvIncrementAfter: req.session.ppvIncrementAfter !== undefined ? req.session.ppvIncrementAfter : 2,
+    ppvPriceCap: req.session.ppvPriceCap !== undefined ? req.session.ppvPriceCap : 15,
   });
 });
 
@@ -3197,7 +3209,7 @@ app.post('/api/ai-settings', async (req, res) => {
     return res.status(401).json({ error: 'Not authenticated' });
   }
 
-  const { systemPrompt, aiMode, fastResponseMode, maxReplyTokens, maxProfileTokens, replyTemperature, aiModel, profileModel } = req.body;
+  const { systemPrompt, aiMode, fastResponseMode, maxReplyTokens, maxProfileTokens, replyTemperature, aiModel, profileModel, ppvBasePrice, ppvIncrement, ppvIncrementAfter, ppvPriceCap } = req.body;
 
   if (systemPrompt !== undefined) {
     req.session.systemPrompt = systemPrompt;
@@ -3223,6 +3235,18 @@ app.post('/api/ai-settings', async (req, res) => {
   if (profileModel !== undefined) {
     req.session.profileModel = profileModel;
   }
+  if (ppvBasePrice !== undefined) {
+    req.session.ppvBasePrice = parseFloat(ppvBasePrice);
+  }
+  if (ppvIncrement !== undefined) {
+    req.session.ppvIncrement = parseFloat(ppvIncrement);
+  }
+  if (ppvIncrementAfter !== undefined) {
+    req.session.ppvIncrementAfter = parseInt(ppvIncrementAfter);
+  }
+  if (ppvPriceCap !== undefined) {
+    req.session.ppvPriceCap = parseFloat(ppvPriceCap);
+  }
 
   // Save to database if we have a user email
   if (req.session.userEmail) {
@@ -3235,7 +3259,11 @@ app.post('/api/ai-settings', async (req, res) => {
       ai_model: req.session.aiModel,
       profile_model: req.session.profileModel,
       fast_response_mode: req.session.fastResponseMode,
-      active_persona_key: req.session.activePersonaKey
+      active_persona_key: req.session.activePersonaKey,
+      ppv_base_price: req.session.ppvBasePrice,
+      ppv_increment: req.session.ppvIncrement,
+      ppv_increment_after: req.session.ppvIncrementAfter,
+      ppv_price_cap: req.session.ppvPriceCap,
     };
     await saveAISettings(req.session.userEmail, dbSettings);
     console.log('[AI Settings] Saved to database for user:', req.session.userEmail);
@@ -3250,7 +3278,11 @@ app.post('/api/ai-settings', async (req, res) => {
     maxProfileTokens: req.session.maxProfileTokens || 500,
     replyTemperature: req.session.replyTemperature !== undefined ? req.session.replyTemperature : 0.9,
     aiModel: req.session.aiModel || 'gpt-4o',
-    profileModel: req.session.profileModel || 'gpt-4o'
+    profileModel: req.session.profileModel || 'gpt-4o',
+    ppvBasePrice: req.session.ppvBasePrice !== undefined ? req.session.ppvBasePrice : 5,
+    ppvIncrement: req.session.ppvIncrement !== undefined ? req.session.ppvIncrement : 1,
+    ppvIncrementAfter: req.session.ppvIncrementAfter !== undefined ? req.session.ppvIncrementAfter : 2,
+    ppvPriceCap: req.session.ppvPriceCap !== undefined ? req.session.ppvPriceCap : 15,
   });
 });
 
@@ -4081,7 +4113,12 @@ app.get('/api/media-control/queue/:conversationUuid', async (req, res) => {
     });
 
     // Get PPV pricing for this subscriber
-    const ppvPricing = await calculateNextPPVPrice(conversationUuid);
+    const ppvPricing = await calculateNextPPVPrice(conversationUuid, {
+      basePrice: req.session.ppvBasePrice,
+      increment: req.session.ppvIncrement,
+      incrementAfter: req.session.ppvIncrementAfter,
+      priceCap: req.session.ppvPriceCap,
+    });
 
     return res.json({
       success: true,

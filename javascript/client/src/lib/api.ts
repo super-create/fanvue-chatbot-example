@@ -6,6 +6,8 @@ const API_BASE = '' // Same origin
 export interface Conversation {
   uuid: string
   label: string
+  latestMessageId?: string | null
+  latestMessageAt?: string | null
 }
 
 export interface MediaVariant {
@@ -311,6 +313,10 @@ export interface AISettings {
   maxReplyTokens: number
   replyTemperature: number
   aiModel: string
+  ppvBasePrice?: number
+  ppvIncrement?: number
+  ppvIncrementAfter?: number
+  ppvPriceCap?: number
 }
 
 export interface MediaToSend {
@@ -341,7 +347,7 @@ export async function getChatsSettings(): Promise<ChatsSettings> {
 export async function getAISettings(): Promise<AISettings> {
   try {
     const res = await fetch(`${API_BASE}/api/ai-settings`)
-    if (!res.ok) return { systemPrompt: '', aiMode: 'manual', maxReplyTokens: 150, replyTemperature: 0.9, aiModel: 'gpt-4o' }
+    if (!res.ok) return { systemPrompt: '', aiMode: 'manual', maxReplyTokens: 150, replyTemperature: 0.9, aiModel: 'gpt-4o', ppvBasePrice: 5, ppvIncrement: 1, ppvIncrementAfter: 2, ppvPriceCap: 15 }
     return await res.json()
   } catch {
     return { systemPrompt: '', aiMode: 'manual', maxReplyTokens: 150, replyTemperature: 0.9, aiModel: 'gpt-4o' }

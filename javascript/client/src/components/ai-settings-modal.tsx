@@ -25,6 +25,10 @@ interface AISettings {
   maxReplyTokens: number
   replyTemperature: number
   aiModel: string
+  ppvBasePrice: number
+  ppvIncrement: number
+  ppvIncrementAfter: number
+  ppvPriceCap: number
 }
 
 interface AISettingsModalProps {
@@ -39,6 +43,10 @@ export function AISettingsModal({ open, onOpenChange }: AISettingsModalProps) {
     maxReplyTokens: 150,
     replyTemperature: 0.9,
     aiModel: "gpt-4o",
+    ppvBasePrice: 5,
+    ppvIncrement: 1,
+    ppvIncrementAfter: 2,
+    ppvPriceCap: 15,
   })
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -61,6 +69,10 @@ export function AISettingsModal({ open, onOpenChange }: AISettingsModalProps) {
           maxReplyTokens: data.maxReplyTokens || 150,
           replyTemperature: data.replyTemperature ?? 0.9,
           aiModel: data.aiModel || "gpt-4o",
+          ppvBasePrice: data.ppvBasePrice ?? 5,
+          ppvIncrement: data.ppvIncrement ?? 1,
+          ppvIncrementAfter: data.ppvIncrementAfter ?? 2,
+          ppvPriceCap: data.ppvPriceCap ?? 15,
         })
       }
     } catch (error) {
@@ -189,6 +201,65 @@ export function AISettingsModal({ open, onOpenChange }: AISettingsModalProps) {
               />
               <p className="text-xs text-muted-foreground">
                 Lower = more consistent, Higher = more creative/varied
+              </p>
+            </div>
+
+            <Separator />
+
+            {/* PPV Pricing */}
+            <div className="space-y-3">
+              <label className="text-sm font-medium text-foreground">PPV Pricing</label>
+              <p className="text-xs text-muted-foreground">
+                Customize how PPV prices escalate. Defaults: $5 base, +$1 every 2 purchases, $15 cap.
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs text-muted-foreground">Base price ($)</label>
+                  <Input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={settings.ppvBasePrice}
+                    onChange={(e) => setSettings((s) => ({ ...s, ppvBasePrice: parseFloat(e.target.value) || 5 }))}
+                    className="bg-secondary border-border h-8 text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs text-muted-foreground">Increase by ($)</label>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={settings.ppvIncrement}
+                    onChange={(e) => setSettings((s) => ({ ...s, ppvIncrement: parseFloat(e.target.value) || 1 }))}
+                    className="bg-secondary border-border h-8 text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs text-muted-foreground">Increase after (purchases)</label>
+                  <Input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={settings.ppvIncrementAfter}
+                    onChange={(e) => setSettings((s) => ({ ...s, ppvIncrementAfter: parseInt(e.target.value) || 2 }))}
+                    className="bg-secondary border-border h-8 text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs text-muted-foreground">Price cap ($)</label>
+                  <Input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={settings.ppvPriceCap}
+                    onChange={(e) => setSettings((s) => ({ ...s, ppvPriceCap: parseFloat(e.target.value) || 15 }))}
+                    className="bg-secondary border-border h-8 text-sm"
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Example with current settings: ${settings.ppvBasePrice} → ${settings.ppvBasePrice + settings.ppvIncrement} (after {settings.ppvIncrementAfter} purchases) → ${settings.ppvBasePrice + settings.ppvIncrement * 2} → ... → ${settings.ppvPriceCap} max
               </p>
             </div>
 
