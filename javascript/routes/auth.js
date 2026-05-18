@@ -221,25 +221,8 @@ function createAuthRoutes(config) {
           req.session.userId = user.id;
           console.log('[Auth] User record:', user.id);
 
-          // Load subscription status — auto-start trial for brand new users
-          let subscription = await getSubscription(user.id);
-          if (!subscription) {
-            console.log('[Auth] New user — starting 7-day free trial for:', userEmail);
-            const trialEnd = new Date();
-            trialEnd.setDate(trialEnd.getDate() + 7);
-            subscription = await upsertSubscription(user.id, {
-              fanvue_user_uuid: fanvueUserUuid,
-              status: 'trialing',
-              plan: 'trial',
-              trial_ends_at: trialEnd.toISOString(),
-              current_period_start: new Date().toISOString(),
-              current_period_end: trialEnd.toISOString()
-            });
-            // Trigger welcome drip sequence in Loops
-            triggerLoopsEvent(userEmail, 'trial_started', {
-              firstName: fanvueHandle || userEmail.split('@')[0]
-            });
-          }
+          // Load subscription status (Fanvue App Store handles billing)
+          const subscription = await getSubscription(user.id);
           req.session.subscription = subscription || { status: 'none' };
           console.log('[Auth] Subscription status:', subscription?.status || 'none');
         }
