@@ -5136,6 +5136,52 @@ app.get('/api/explore/*', async (req, res) => {
   }
 });
 
+// DELETE /api/my-account - Permanently delete all user data
+app.delete('/api/my-account', requireAuth, async (req, res) => {
+  const userId = req.session.userId;
+  const userEmail = req.session.userEmail;
+
+  if (!userId || !userEmail) {
+    return res.status(400).json({ error: 'Missing user identity in session' });
+  }
+
+  console.log('[DeleteAccount] Starting deletion for:', userEmail, userId);
+
+  try {
+    // Delete in child-first order to avoid FK constraint violations
+    const deletions = [
+      supabase.from('subscriber_memories').delete().eq('creator_email', userEmail),
+      supabase.from('content_requests').delete().eq('creator_email', userEmail),
+      supabase.from('creator_personas').delete().eq('creator_email', userEmail),
+      supabase.from('ai_settings').delete().eq('user_email', userEmail),
+    ];
+
+    for (const op of deletions) {
+      const { error } = await op;
+      if (error) console.error('[DeleteAccount] Deletion step error (non-fatal):', error.message);
+    }
+
+    const { error: usageErr } = await supabase.from('usage_tracking').delete().eq('user_id', userId);
+    if (usageErr) console.error('[DeleteAccount] usage_tracking error:', usageErr.message);
+
+    const { error: subErr } = await supabase.from('subscriptions').delete().eq('user_id', userId);
+    if (subErr) console.error('[DeleteAccount] subscriptions error:', subErr.message);
+
+    const { error: userErr } = await supabase.from('users').delete().eq('id', userId);
+    if (userErr) console.error('[DeleteAccount] users error:', userErr.message);
+
+    console.log('[DeleteAccount] All data deleted for:', userEmail);
+
+    req.session.destroy((err) => {
+      if (err) console.error('[DeleteAccount] Session destroy error:', err);
+      res.json({ success: true });
+    });
+  } catch (err) {
+    console.error('[DeleteAccount] Unexpected error:', err.message);
+    res.status(500).json({ error: 'Failed to delete account. Please try again.' });
+  }
+});
+
 // ============================================
 // MOUNT ROUTES
 // ============================================

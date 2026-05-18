@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-import { Save, Loader2 } from "lucide-react"
+import { Save, Loader2, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
 interface AISettings {
@@ -50,10 +50,14 @@ export function AISettingsModal({ open, onOpenChange }: AISettingsModalProps) {
   })
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     if (open) {
       loadSettings()
+    } else {
+      setDeleteConfirm(false)
     }
   }, [open])
 
@@ -100,6 +104,25 @@ export function AISettingsModal({ open, onOpenChange }: AISettingsModalProps) {
       toast.error("Failed to save settings")
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    try {
+      setDeleting(true)
+      const res = await fetch("/api/my-account", { method: "DELETE" })
+      if (res.ok) {
+        window.location.href = "/logout"
+      } else {
+        const data = await res.json().catch(() => ({}))
+        toast.error(data.error || "Failed to delete account")
+        setDeleting(false)
+        setDeleteConfirm(false)
+      }
+    } catch {
+      toast.error("Failed to delete account")
+      setDeleting(false)
+      setDeleteConfirm(false)
     }
   }
 
@@ -294,6 +317,45 @@ export function AISettingsModal({ open, onOpenChange }: AISettingsModalProps) {
               )}
               {saving ? "Saving..." : "Save Settings"}
             </Button>
+
+            {/* Danger Zone */}
+            <div style={{ marginTop: '24px', borderTop: '1px solid #3a1a1a', paddingTop: '20px' }}>
+              <p style={{ fontSize: '12px', fontWeight: 600, color: '#ef4444', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Danger Zone</p>
+              {!deleteConfirm ? (
+                <Button
+                  variant="outline"
+                  className="w-full border-red-800 text-red-400 hover:bg-red-950 hover:text-red-300"
+                  onClick={() => setDeleteConfirm(true)}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete my account
+                </Button>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <p style={{ fontSize: '13px', color: '#fca5a5', textAlign: 'center' }}>
+                    This will permanently delete all your data including settings, memories, and persona. This cannot be undone.
+                  </p>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <Button
+                      variant="outline"
+                      className="flex-1 border-border text-muted-foreground"
+                      onClick={() => setDeleteConfirm(false)}
+                      disabled={deleting}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                      onClick={handleDeleteAccount}
+                      disabled={deleting}
+                    >
+                      {deleting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Trash2 className="h-4 w-4 mr-2" />}
+                      {deleting ? "Deleting..." : "Yes, delete everything"}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </DialogContent>
